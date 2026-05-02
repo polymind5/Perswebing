@@ -123,7 +123,7 @@ const MOBILE_LAYOUT_DEFAULTS = {
   paddingTop: 84,
   paddingBottom: 84,
   cardMaxWidth: 400,
-  cardMinWidth: 310,
+  cardMinWidth: 270,
   cardInset: 58,
   dotSize: 20,
   dotInset: 20,

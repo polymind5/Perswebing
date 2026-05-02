@@ -1,0 +1,389 @@
+/* Desktop - 38 */
+
+position: relative;
+width: 1440px;
+height: 1024px;
+
+background: #FFFFFF;
+
+
+/* Frame 17 */
+
+position: absolute;
+width: 418px;
+height: 418px;
+left: 242px;
+top: 500px;
+
+background: url(The all.png);
+
+
+/* Frame 21 */
+
+position: absolute;
+width: 335px;
+height: 335px;
+left: 600px;
+top: 194px;
+
+background: url(The light sq..jpg);
+
+
+/* Frame 20 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 347px;
+height: 190px;
+left: 915px;
+top: 95px;
+
+background: #FFFFFF;
+border: 1px solid #000000;
+border-radius: 10px;
+
+
+/* The Question is the First Answer */
+
+position: absolute;
+width: 230px;
+height: 44px;
+left: 20px;
+top: 20px;
+
+font-family: 'Michroma';
+font-style: normal;
+font-weight: 400;
+font-size: 16px;
+line-height: 134.4%;
+/* or 22px */
+
+color: #000000;
+
+
+
+/* "What do you want to know?", starts the cycle of curiosity as being the question zero. */
+
+position: absolute;
+width: 230px;
+height: 57px;
+left: 20px;
+top: 72px;
+
+font-family: 'Vollkorn';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 134.4%;
+/* or 19px */
+
+color: #000000;
+
+
+
+/* Vector 53 */
+
+position: absolute;
+width: 47px;
+height: 0px;
+left: 20px;
+top: 68px;
+
+border: 1px solid #000000;
+
+
+/* Frame 24 */
+
+position: absolute;
+width: 58px;
+height: 18px;
+left: 20px;
+top: 148px;
+
+
+
+/* Read it */
+
+position: absolute;
+width: 58px;
+height: 15px;
+left: 0px;
+top: 0px;
+
+font-family: 'Vollkorn';
+font-style: normal;
+font-weight: 400;
+font-size: 14px;
+line-height: 134.4%;
+/* or 19px */
+
+color: #000000;
+
+
+
+/* Arrow right-circle */
+
+position: absolute;
+width: 10px;
+height: 10px;
+left: 45px;
+top: 4px;
+
+
+
+/* Icon */
+
+position: absolute;
+left: 8.33%;
+right: 8.34%;
+top: 8.33%;
+bottom: 8.34%;
+
+border: 1px solid #1E1E1E;
+
+
+/* Vector 54 */
+
+position: absolute;
+width: 57px;
+height: 12px;
+left: 0px;
+top: 4px;
+
+border: 1px solid #000000;
+border-radius: 7px;
+
+
+/* Frame 18 */
+
+position: absolute;
+width: 488px;
+height: 488px;
+left: 132px;
+top: 41px;
+
+background: url(Patterns_72.png);
+
+
+/* Frame 19 */
+
+position: absolute;
+width: 392px;
+height: 392px;
+left: 915px;
+top: 362px;
+
+background: url(Lightman.png);
+
+
+/* Frame 23 */
+
+box-sizing: border-box;
+
+position: absolute;
+width: 392px;
+height: 234px;
+left: 719px;
+top: 654px;
+
+background: #F9F6E9;
+border: 1px solid #000000;
+border-radius: 10px;
+
+
+/* Yugansh Agarwal is a designer, working through and around the title — all thanks to chronic curiosity. Instagram Twitter(X) Substack yugansh.poly@gmail.com */
+
+position: absolute;
+width: 277px;
+height: 174px;
+left: 30px;
+top: 30px;
+
+font-family: 'Vollkorn';
+font-style: normal;
+font-weight: 400;
+font-size: 16px;
+line-height: 22px;
+
+color: #000000;
+
+
+
+/* Group 1 */
+
+position: absolute;
+width: 64.49px;
+height: 45.38px;
+left: 688px;
+top: 936px;
+
+
+
+/* Vector 38 */
+
+position: absolute;
+width: 62.77px;
+height: 18.38px;
+left: 688.84px;
+top: 944.72px;
+
+border: 0.9375px solid #000000;
+transform: matrix(1, 0, 0, -1, 0, 0);
+
+
+/* Vector 36 */
+
+position: absolute;
+width: 62.77px;
+height: 36.56px;
+left: 688.84px;
+top: 944.81px;
+
+border: 0.9375px solid #000000;
+border-radius: 0.9375px;
+
+
+/* Ellipse 40 */
+
+position: absolute;
+width: 21.47px;
+height: 21.47px;
+left: 709.47px;
+top: 952.31px;
+
+background: #000000;
+
+
+/* Rectangle 39 */
+
+position: absolute;
+width: 2.62px;
+height: 6.09px;
+left: 718.94px;
+top: 936px;
+
+background: #000000;
+border-radius: 18.75px;
+
+
+/* Rectangle 40 */
+
+position: absolute;
+width: 2.62px;
+height: 6.09px;
+left: 727.93px;
+top: 937.07px;
+
+background: #000000;
+border-radius: 18.75px;
+transform: rotate(15deg);
+
+
+/* Rectangle 41 */
+
+position: absolute;
+width: 2.62px;
+height: 6.09px;
+left: 708.4px;
+top: 937.03px;
+
+background: #000000;
+border-radius: 18.75px;
+transform: rotate(-15deg);
+
+
+/* Rectangle 42 */
+
+position: absolute;
+width: 2.62px;
+height: 6.09px;
+left: 697.6px;
+top: 940.26px;
+
+background: #000000;
+border-radius: 18.75px;
+transform: rotate(-30deg);
+
+
+/* Rectangle 43 */
+
+position: absolute;
+width: 2.62px;
+height: 6.09px;
+left: 737.04px;
+top: 940.3px;
+
+background: #000000;
+border-radius: 18.75px;
+transform: rotate(30deg);
+
+
+/* Rectangle 44 */
+
+position: absolute;
+width: 2.62px;
+height: 6.09px;
+left: 746.32px;
+top: 946.96px;
+
+background: #000000;
+border-radius: 18.75px;
+transform: rotate(45deg);
+
+
+/* Rectangle 45 */
+
+position: absolute;
+width: 2.62px;
+height: 6.09px;
+left: 688px;
+top: 946.9px;
+
+background: #000000;
+border-radius: 18.75px;
+transform: rotate(-45deg);
+
+
+/* Ellipse 44 */
+
+position: absolute;
+width: 30px;
+height: 30px;
+left: 50px;
+top: 50px;
+
+background: #27AA20;
+
+
+/* Ellipse 46 */
+
+position: absolute;
+width: 30px;
+height: 30px;
+left: 1360px;
+top: 50px;
+
+background: #27AA20;
+
+
+/* Ellipse 45 */
+
+position: absolute;
+width: 30px;
+height: 30px;
+left: 50px;
+top: 944px;
+
+background: #27AA20;
+
+
+/* Ellipse 47 */
+
+position: absolute;
+width: 30px;
+height: 30px;
+left: 1360px;
+top: 944px;
+
+background: #27AA20;

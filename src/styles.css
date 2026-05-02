@@ -1,0 +1,980 @@
+/* ============================================
+   Perswebbing — Collage Portfolio
+   ============================================ */
+
+/* Reset */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #FFFFFF;
+  font-family: 'Vollkorn', serif;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================
+   Canvas — scaled to fit viewport via JS
+   ============================================ */
+.canvas-wrapper {
+  width: 100%;
+  height: 100vh;
+  overflow: visible;
+  background: #FFFFFF;
+  position: relative;
+}
+
+.canvas {
+  position: absolute;
+  background: #FFFFFF;
+  overflow: visible;
+  transform-origin: top left;
+}
+
+/* ============================================
+   Image/Video Frames — Anchor-Point System
+   ============================================ */
+.frame-card {
+  display: flex;
+  cursor: pointer;
+  pointer-events: none;
+  transition:
+    filter 0.35s ease,
+    transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.frame-card:hover {
+  transform: scale(1.015);
+}
+
+.frame-card-media-wrapper {
+  display: flex;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.frame-card img,
+.frame-card video,
+.frame-card .companion-text {
+  pointer-events: auto;
+}
+
+.frame-card img,
+.frame-card video {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  display: block;
+  object-fit: contain;
+}
+
+/* Anchor: top-left */
+.frame-anchor-tl {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.frame-anchor-tl img,
+.frame-anchor-tl video {
+  object-position: left top;
+}
+
+/* Anchor: bottom-left */
+.frame-anchor-bl {
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.frame-anchor-bl img,
+.frame-anchor-bl video {
+  object-position: left bottom;
+}
+
+/* Anchor: top-right */
+.frame-anchor-tr {
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.frame-anchor-tr img,
+.frame-anchor-tr video {
+  object-position: right top;
+}
+
+/* ============================================
+   Slide-out Card Labels
+   ============================================ */
+.card-label {
+  position: absolute;
+  white-space: nowrap;
+  font-family: 'Michroma', sans-serif;
+  font-size: 24px;
+  color: #787878;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity var(--label-speed, 0.35s) ease, transform var(--label-speed, 0.35s) cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.card-label--tl {
+  right: 100%;
+  top: var(--label-top, 0px);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg) translateX(var(--label-start, -10px));
+}
+
+.frame-card:hover .card-label--tl,
+.card-article:hover .card-label--tl {
+  opacity: 1;
+  transform: rotate(180deg) translateX(var(--label-end, 5px));
+}
+
+.card-label--bl {
+  right: 100%;
+  bottom: var(--label-top, 0px);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg) translateX(var(--label-start, -10px));
+}
+
+.frame-card:hover .card-label--bl,
+.card-article:hover .card-label--bl {
+  opacity: 1;
+  transform: rotate(180deg) translateX(var(--label-end, 5px));
+}
+
+.card-label--tr {
+  left: 100%;
+  top: var(--label-top, 0px);
+  writing-mode: vertical-rl;
+  transform: translateX(var(--label-start, -10px));
+}
+
+.frame-card:hover .card-label--tr,
+.card-article:hover .card-label--tr {
+  opacity: 1;
+  transform: translateX(var(--label-end, 5px));
+}
+
+
+
+/* ============================================
+   Article Card — Words
+   ============================================ */
+.card-article {
+  background: #FFFFFF;
+  border: 1px solid #000000;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition:
+    filter 0.35s ease,
+    transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.card-article:hover {
+  transform: translateY(-2px);
+}
+
+.card-article__title {
+  font-family: 'Michroma', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 134.4%;
+  color: #000000;
+  margin: 0;
+  width: 230px;
+}
+
+.card-article__divider {
+  width: 47px;
+  height: 0;
+  border: none;
+  border-top: 1px solid #000000;
+  margin: 6px 0;
+}
+
+.card-article__desc {
+  font-family: 'Vollkorn', serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 134.4%;
+  color: #000000;
+  width: 230px;
+  margin: 0;
+}
+
+.card-article__link {
+  display: inline-flex;
+  align-items: flex-end;
+  margin-top: auto;
+  text-decoration: none;
+  position: relative;
+  width: fit-content;
+  padding-right: 2px;
+  padding-bottom: 0px;
+}
+
+.card-article__link-text {
+  font-family: 'Vollkorn', serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 134.4%;
+  color: #000000;
+  position: relative;
+  z-index: 1;
+  padding: 0px 4px 0 2px;
+}
+
+.card-article__link-icon {
+  width: 13px;
+  height: 13px;
+  margin-left: -1px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 4px;
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.card-article__link-border {
+  position: absolute;
+  left: 0;
+  bottom: 2px;
+  width: 100%;
+  height: 14.5px;
+  border-bottom: 1px solid #000000;
+  border-right: 1px solid #000000;
+  border-bottom-right-radius: 8px;
+  pointer-events: none;
+  transition: height 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.card-article__link:hover .card-article__link-text {
+  opacity: 0.7;
+}
+
+.card-article__link:hover .card-article__link-icon {
+  transform: rotate(-45deg);
+}
+
+.card-article__link:hover .card-article__link-border {
+  height: 13px;
+}
+
+/* ============================================
+   Bio Card — Info
+   ============================================ */
+.card-bio {
+  background: #F9F6E9;
+  border: 1px solid #000000;
+  border-radius: 10px;
+  padding: 30px;
+  transition:
+    filter 0.35s ease,
+    transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.card-bio:hover {
+  transform: translateY(-2px);
+}
+
+.card-bio__text {
+  font-family: 'Vollkorn', serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 22px;
+  color: #000000;
+}
+
+.card-bio__links {
+  font-family: 'Vollkorn', serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 22px;
+  color: #000000;
+  margin-top: 16px;
+}
+
+.card-bio__links a {
+  color: #787878;
+  text-decoration: none;
+  display: block;
+  width: fit-content;
+  line-height: 22px;
+  transition: color 0.15s ease;
+}
+
+.card-bio__links a:hover {
+  color: #000000;
+}
+
+.card-bio__email {
+  margin-top: 0;
+}
+
+/* ============================================
+   Corner Dots
+   ============================================ */
+.corner-dot {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  background: #27AA20;
+  border-radius: 50%;
+  z-index: 1100;
+}
+
+.corner-dot--tl {
+  left: 30px;
+  top: 30px;
+}
+
+.corner-dot--tr {
+  right: 30px;
+  top: 30px;
+}
+
+.corner-dot--bl {
+  left: 30px;
+  bottom: 30px;
+}
+
+.corner-dot--br {
+  right: 30px;
+  bottom: 30px;
+}
+
+/* ============================================
+   Navigation Buttons
+   ============================================ */
+.archive-button,
+.ideology-button {
+  position: absolute;
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: 'Michroma', sans-serif;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  color: transparent;
+  transition: opacity 0.3s ease, -webkit-text-stroke 0.2s ease;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 1100;
+}
+
+.archive-button {
+  right: var(--archive-right, 70px);
+  bottom: var(--archive-bottom, 50px);
+  font-size: var(--archive-size, 32px);
+  -webkit-text-stroke: var(--archive-stroke, 1px) #27AA20;
+}
+
+.ideology-button {
+  left: var(--ideology-left, 70px);
+  bottom: var(--ideology-bottom, 50px);
+  font-size: var(--ideology-size, 32px);
+  -webkit-text-stroke: var(--ideology-stroke, 1px) #27AA20;
+}
+
+/* Archive button hover styles handled by transition */
+
+/* ============================================
+   Archive View
+   ============================================ */
+.archive-view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  z-index: 1050;
+  padding:
+    var(--arc-pad-top, 60px) var(--arc-pad-right, 50px) var(--arc-pad-bottom, 80px) var(--arc-pad-left, 50px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-mask-image:
+    linear-gradient(to bottom, black calc(100% - var(--arc-blur-bottom-start, 140px)), transparent calc(100% - var(--arc-blur-bottom-end, 100px))),
+    linear-gradient(to right, black calc(100% - var(--arc-blur-right-start, 40px)), transparent calc(100% - var(--arc-blur-right-end, 0px)));
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, black calc(100% - var(--arc-blur-bottom-start, 140px)), transparent calc(100% - var(--arc-blur-bottom-end, 100px))),
+    linear-gradient(to right, black calc(100% - var(--arc-blur-right-start, 40px)), transparent calc(100% - var(--arc-blur-right-end, 0px)));
+  mask-composite: intersect;
+}
+
+/* Hide scrollbar but keep functionality */
+.archive-view::-webkit-scrollbar {
+  display: none;
+}
+
+.archive-view {
+  scrollbar-width: none;
+}
+
+.archive-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--arc-section-gap, 6px);
+}
+
+.archive-section {
+  /* No extra margin — gap handles it */
+}
+
+/* ── Project title ── */
+.archive-project__name {
+  font-family: 'Vollkorn', serif;
+  font-weight: 700;
+  font-size: var(--arc-title-size, 14px);
+  line-height: 1.3;
+  color: #000000;
+  margin-top: var(--arc-title-mt, 10px);
+  margin-bottom: var(--arc-title-mb, 4px);
+  padding: 0;
+}
+
+/* ── Horizontal scroll row ── */
+.archive-project-row {
+  display: flex;
+  gap: var(--arc-img-gap, 8px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* Hide scrollbar */
+  scrollbar-width: none;
+}
+
+.archive-project-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Individual media item ── */
+.archive-media-item {
+  flex-shrink: 0;
+  height: var(--arc-row-h, 200px);
+  border-radius: var(--arc-radius, 4px);
+  overflow: hidden;
+}
+
+.archive-media-item img,
+.archive-media-item video {
+  display: block;
+  height: 100%;
+  width: auto;
+  object-fit: cover;
+  clip-path: inset(1px);
+  /* Hides 1px edge artifacts like green boundaries from image exports */
+}
+
+
+
+/* ============================================
+   Eye Icon — Frame 5.svg, 30×30
+   ============================================ */
+.eye-icon {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 28px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.eye-icon:hover {
+  transform: translateX(-50%) scale(1.12);
+}
+
+.eye-icon img {
+  width: 100%;
+  height: 100%;
+}
+
+/* ============================================
+   Companion Text — hover pairing overlay
+   ============================================ */
+.card-bio--text-mode {
+  background: #F9F6E9;
+}
+
+.companion-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 28px;
+  background: #f9f6e9;
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: default;
+  pointer-events: auto;
+  opacity: 0;
+  animation: fadeTextIn 0.35s ease forwards;
+  transition: width 0.25s ease, height 0.25s ease;
+}
+
+.companion-text__title {
+  font-family: 'Michroma', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.3;
+  color: #000000;
+  margin: 0;
+}
+
+.companion-text__desc {
+  font-family: 'Vollkorn', serif;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.3;
+  color: rgba(0, 0, 0, 0.8);
+  margin: 0;
+}
+
+/* Bio card overrides for companion text */
+.companion-text--bio {
+  position: relative;
+  background: transparent;
+  padding: 0;
+}
+
+.companion-text--bio .companion-text__title {
+  color: #000000;
+}
+
+.companion-text--bio .companion-text__desc {
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* Article card overrides for companion text */
+.card-article--text-mode {
+  background: #F9F6E9;
+}
+
+.companion-text--article {
+  position: relative;
+  background: transparent;
+  padding: 0;
+}
+
+.companion-text--article .companion-text__title {
+  color: #000000;
+}
+
+.companion-text--article .companion-text__desc {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+@keyframes fadeTextIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   View Project Button — Projects card hover
+   ============================================ */
+
+/* Allow the button to bleed outside the card bounds */
+.projects-card {
+  overflow: visible !important;
+}
+
+/* Fade-out fast (0.12s); fade-in uses --vp-fade (set by card hover override below) */
+.view-project-btn {
+  position: absolute;
+  top: -19px;
+  right: -60px;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 6px 14px;
+  text-decoration: none;
+  pointer-events: none;
+  z-index: 300;
+  opacity: 0;
+  transform-origin: center center;
+  border-radius: 20px;
+  /* 1px border is the default resting stroke */
+  border: 1px solid black;
+  /* Inset shadow starts at 0 — will grow on hover */
+  box-shadow: inset 0 0 0 0px black;
+  transition:
+    opacity 0.12s ease,
+    box-shadow 0.18s ease;
+  cursor: pointer;
+}
+
+/* Fade-IN: slower, overrides the base transition */
+.projects-card:hover .view-project-btn,
+.view-project-btn:hover {
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    opacity var(--vp-fade, 0.25s) ease,
+    box-shadow 0.18s ease;
+}
+
+/* On direct button hover: inset shadow grows to 3px
+   (border + shadow together read as ~4px inset stroke) */
+.view-project-btn:hover {
+  box-shadow: inset 0 0 0 3px black;
+}
+
+.view-project-btn__text {
+  font-family: 'Michroma', sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+  color: #000000;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-align: left;
+}
+
+.view-project-btn__icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 12px;
+  height: 12px;
+  margin-left: 6px;
+  margin-top: -2px;
+  transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.view-project-btn:hover .view-project-btn__icon {
+  transform: rotate(-45deg);
+}
+
+/* ============================================
+   Ideology View
+   ============================================ */
+.ideology-view {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  z-index: 1050;
+  overflow: hidden;
+}
+
+.ideology-unit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Big word — sits behind the text block */
+.ideology-big-word {
+  position: absolute;
+  font-family: 'Michroma', sans-serif;
+  font-weight: 400;
+  color: #000000;
+  white-space: nowrap;
+  line-height: 1;
+  z-index: 1;
+  user-select: none;
+  pointer-events: auto;
+}
+
+/* Body text block — sits on top of the big word */
+.ideology-body {
+  position: absolute;
+  font-family: 'Vollkorn', serif;
+  font-weight: 400;
+  color: #000000;
+  margin: 0;
+  z-index: 2;
+  text-align: left;
+  pointer-events: auto;
+}
+
+/* Agentation override — push to bottom left */
+.agentation-left-align {
+  left: 20px !important;
+  right: auto !important;
+}
+
+/* ============================================
+   Interactive Floating 3D Card
+   ============================================ */
+.interactive-card-wrapper {
+  position: fixed;
+  z-index: 1200;
+  /* Ensure it stays way above everything */
+  pointer-events: none;
+  /* Let mouse interact with things beneath when hovering */
+  width: 250px;
+  height: 350px;
+  perspective: 1000px;
+}
+
+.interactive-card-wrapper.is-thrown {
+  pointer-events: auto;
+  /* Clickable when thrown */
+}
+
+/* Subtle dark underglow only appears when thrown */
+.interactive-card-wrapper.is-thrown .interactive-card-parallax-layer {
+  filter:
+    drop-shadow(0 var(--shadow1-oy, 20px) var(--shadow1-blur, 40px) rgba(0, 0, 0, var(--shadow1-opacity, 0.4))) drop-shadow(0 0 var(--shadow2-blur, 100px) rgba(0, 0, 0, var(--shadow2-opacity, 0.2)));
+}
+
+.interactive-card-parallax-layer {
+  width: 100%;
+  height: 100%;
+  transition: filter 0.5s ease;
+}
+
+.interactive-card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.interactive-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.interactive-card-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Prevent background peering through */
+  background: transparent;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  /* Safari support */
+}
+
+/* Back face is visually flipped ahead of time */
+.interactive-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Light reflection — follows cursor when card is thrown */
+.interactive-card-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 10;
+  mix-blend-mode: soft-light;
+  transition: background 0.05s ease;
+
+  /* Mask it exactly to the card PNG so the glare doesn't spill into transparent edges */
+  -webkit-mask-image: url('/Card front.png');
+  -webkit-mask-size: contain;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-image: url('/Card front.png');
+  mask-size: contain;
+  mask-position: center;
+  mask-repeat: no-repeat;
+}
+
+/* ============================================
+   Mobile Layout Overrides
+   ============================================ */
+.canvas-wrapper.is-mobile {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.canvas-wrapper.is-mobile .canvas {
+  position: relative !important;
+  transform: none !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 100vh;
+}
+
+.canvas-wrapper.is-mobile .home-content {
+  gap: 0;
+}
+
+/* Hide desktop-only features on mobile */
+.canvas-wrapper.is-mobile .card-label {
+  display: none;
+}
+
+/* Reset hover scale on mobile (no hover on touch) */
+.canvas-wrapper.is-mobile .frame-card:hover {
+  transform: none;
+}
+
+.canvas-wrapper.is-mobile .frame-card-media-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+.canvas-wrapper.is-mobile .frame-card img,
+.canvas-wrapper.is-mobile .frame-card video {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: 50% 50%;
+}
+
+.canvas-wrapper.is-mobile .projects-card img {
+  object-position: var(--mobile-project-anchor-x, 50%) var(--mobile-project-anchor-y, 50%);
+}
+
+.canvas-wrapper.is-mobile .photos-card img {
+  object-position: right top;
+}
+
+.canvas-wrapper.is-mobile .view-project-btn {
+  display: none;
+}
+
+.canvas-wrapper.is-mobile .mobile-card-slot+.mobile-card-slot {
+  margin-top: 26px;
+}
+
+/* Mobile-only button rendered outside the scaled card transform */
+.mobile-view-project-btn {
+  position: absolute;
+  bottom: 80px;
+  left: -35px;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  text-decoration: none;
+  border-radius: 20px;
+  border: 1px solid #000000;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.mobile-view-project-btn__text {
+  font-family: 'Michroma', sans-serif;
+  font-weight: 400;
+  font-size: 8px;
+  color: #000000;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  text-align: left;
+}
+
+.mobile-view-project-btn__icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 11px;
+  height: 11px;
+  margin-left: 4px;
+  margin-top: -2px;
+}
+
+.canvas-wrapper.is-mobile .frame-card,
+.canvas-wrapper.is-mobile .card-article,
+.canvas-wrapper.is-mobile .card-bio {
+  max-width: none;
+}
+
+.canvas-wrapper.is-mobile .companion-text {
+  padding: 28px;
+}
+
+.mobile-side-button {
+  position: fixed;
+  bottom: var(--mobile-side-label-bottom, 46px);
+  z-index: 1102;
+  font-size: var(--mobile-side-label-size, 26px);
+  line-height: 0.8;
+  writing-mode: vertical-rl;
+  letter-spacing: -1px;
+}
+
+.mobile-side-button--left {
+  left: var(--mobile-side-label-inset, 10px);
+  transform: rotate(180deg);
+}
+
+.mobile-side-button--right {
+  right: var(--mobile-side-label-inset, 10px);
+}
+
+/* ============================================
+   Ideology Mobile Layout
+   ============================================ */
+.ideology-view.is-mobile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 96px 60px 180px;
+  gap: 80px;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.ideology-view.is-mobile .ideology-unit {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.ideology-view.is-mobile .ideology-big-word {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+}
+
+.ideology-view.is-mobile .ideology-body {
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  padding-left: 20px;
+}

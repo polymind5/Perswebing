@@ -1,0 +1,14 @@
+<svg width="1000" height="1000" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Frame 14">
+<path id="Vector 38" d="M165 529C165 529 242.558 333 500 333C757.442 333 834.5 529 834.5 529" stroke="black" stroke-width="6" stroke-linecap="round"/>
+<path id="Vector 36" fill-rule="evenodd" clip-rule="evenodd" d="M499.75 724C263.013 724 178.503 558.859 166.53 532.522C165.474 530.198 165.474 527.802 166.53 525.478C178.503 499.141 263.013 334 499.75 334C736.487 334 820.997 499.141 832.97 525.478C834.026 527.802 834.026 530.198 832.97 532.522C820.997 558.859 736.487 724 499.75 724Z" stroke="black" stroke-width="10" stroke-linecap="round"/>
+<circle id="Ellipse 40" cx="499.5" cy="528.5" r="114.5" fill="black"/>
+<rect id="Rectangle 39" x="486" y="240" width="28" height="65" rx="14" fill="black"/>
+<rect id="Rectangle 40" x="598.73" y="251.44" width="28" height="65" rx="14" transform="rotate(15 598.73 251.44)" fill="black"/>
+<rect id="Rectangle 41" x="373.588" y="258.193" width="28" height="65" rx="14" transform="rotate(-15 373.588 258.193)" fill="black"/>
+<rect id="Rectangle 42" x="258.377" y="299.469" width="28" height="65" rx="14" transform="rotate(-30 258.377 299.469)" fill="black"/>
+<rect id="Rectangle 43" x="711.652" y="285.844" width="28" height="65" rx="14" transform="rotate(30 711.652 285.844)" fill="black"/>
+<rect id="Rectangle 44" x="824.041" y="356.907" width="28" height="65" rx="14" transform="rotate(45 824.041 356.907)" fill="black"/>
+<rect id="Rectangle 45" x="156.004" y="376.054" width="28" height="65" rx="14" transform="rotate(-45 156.004 376.054)" fill="black"/>
+</g>
+</svg>

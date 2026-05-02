@@ -1,0 +1,417 @@
+/* ============================================
+   New Design — Collage Portfolio Page
+   ============================================ */
+
+/* Reset */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #FFFFFF;
+    font-family: 'Vollkorn', serif;
+}
+
+/* ============================================
+   Canvas — 1440 × 1024 scaled to fit viewport
+   ============================================ */
+.canvas-wrapper {
+    width: 100%;
+    height: 100vh;
+    overflow: visible;
+    background: #FFFFFF;
+    position: relative;
+}
+
+.canvas {
+    position: absolute;
+    width: 1440px;
+    height: 1024px;
+    background: #FFFFFF;
+    overflow: hidden;
+    transform-origin: top left;
+    /* Scale + position set by JS */
+}
+
+/* ============================================
+   Image Frames — Anchor-Point System
+   Each card is a flex container that pins
+   images to a specific corner/edge.
+   Images keep natural aspect ratio (no crop).
+   ============================================ */
+
+/* Frame 18 — Projects / Patterns (top-left)
+   Anchor: top-left */
+.frame-patterns {
+    position: absolute;
+    width: 488px;
+    height: 488px;
+    left: 132px;
+    top: 41px;
+    overflow: hidden;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.frame-patterns img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    object-position: top left;
+}
+
+/* Frame 21 — Animations / Dark spiral (center)
+   Anchor: top-left */
+.frame-dark-spiral {
+    position: absolute;
+    width: 335px;
+    height: 335px;
+    left: 600px;
+    top: 194px;
+    overflow: hidden;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.frame-dark-spiral img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    object-position: top left;
+}
+
+/* Frame 17 — Graphics / The All (bottom-left)
+   Anchor: bottom-left */
+.frame-the-all {
+    position: absolute;
+    width: 418px;
+    height: 418px;
+    left: 242px;
+    top: 500px;
+    overflow: hidden;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-end;
+}
+
+.frame-the-all img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    object-position: bottom left;
+}
+
+/* Frame 19 — Photos / Lightman (right side)
+   Anchor: top-right */
+.frame-lightman {
+    position: absolute;
+    width: 392px;
+    height: 392px;
+    left: 915px;
+    top: 362px;
+    overflow: hidden;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+}
+
+.frame-lightman img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    object-position: top right;
+}
+
+/* ============================================
+   Article Card — Frame 20 (Words)
+   ============================================ */
+.card-article {
+    position: absolute;
+    width: 347px;
+    height: 190px;
+    left: 915px;
+    top: 95px;
+    background: #FFFFFF;
+    border: 1px solid #000000;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-article__title {
+    font-family: 'Michroma', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 134.4%;
+    color: #000000;
+    margin: 0;
+    width: 230px;
+}
+
+.card-article__divider {
+    width: 47px;
+    height: 0;
+    border: none;
+    border-top: 1px solid #000000;
+    margin: 6px 0 6px 0;
+}
+
+.card-article__desc {
+    font-family: 'Vollkorn', serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 134.4%;
+    color: #000000;
+    width: 230px;
+    margin: 0;
+}
+
+.card-article__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    margin-top: auto;
+    text-decoration: none;
+    position: relative;
+    width: fit-content;
+}
+
+.card-article__link-text {
+    font-family: 'Vollkorn', serif;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 134.4%;
+    color: #000000;
+    position: relative;
+    z-index: 1;
+    padding: 2px 8px 2px 6px;
+}
+
+.card-article__link-icon {
+    width: 10px;
+    height: 10px;
+    margin-left: 0px;
+    position: relative;
+    z-index: 1;
+}
+
+.card-article__link-border {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 57px;
+    height: 12px;
+    border: 1px solid #000000;
+    border-radius: 7px;
+    pointer-events: none;
+}
+
+.card-article__link:hover .card-article__link-text {
+    opacity: 0.7;
+}
+
+/* ============================================
+   Bio Card — Frame 23 (Info)
+   ============================================ */
+.card-bio {
+    position: absolute;
+    width: 392px;
+    height: 234px;
+    left: 719px;
+    top: 654px;
+    background: #F9F6E9;
+    border: 1px solid #000000;
+    border-radius: 10px;
+    padding: 30px;
+}
+
+.card-bio__text {
+    font-family: 'Vollkorn', serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
+    color: #000000;
+}
+
+.card-bio__text strong {
+    font-weight: 400;
+}
+
+.card-bio__links {
+    font-family: 'Vollkorn', serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
+    color: #000000;
+    margin-top: 16px;
+}
+
+.card-bio__links a {
+    color: #000000;
+    text-decoration: none;
+    display: block;
+    line-height: 22px;
+    transition: opacity 0.15s ease;
+}
+
+.card-bio__links a:hover {
+    opacity: 0.5;
+}
+
+.card-bio__email {
+    font-family: 'Vollkorn', serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 22px;
+    color: #000000;
+    text-decoration: none;
+    display: block;
+    margin-top: 4px;
+    transition: opacity 0.15s ease;
+}
+
+.card-bio__email:hover {
+    opacity: 0.5;
+}
+
+/* ============================================
+   Green Corner Dots — fixed to viewport corners
+   ============================================ */
+.corner-dot {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: #27AA20;
+    border-radius: 50%;
+}
+
+.corner-dot--tl {
+    left: 50px;
+    top: 50px;
+}
+
+.corner-dot--tr {
+    left: 1360px;
+    top: 50px;
+}
+
+.corner-dot--bl {
+    left: 50px;
+    top: 944px;
+}
+
+.corner-dot--br {
+    left: 1360px;
+    top: 944px;
+}
+
+/* ============================================
+   Eye Icon — Bottom Center
+   ============================================ */
+.eye-icon {
+    position: absolute;
+    width: 64px;
+    height: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 28px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.eye-icon:hover {
+    transform: translateX(-50%) scale(1.08);
+}
+
+.eye-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* ============================================
+   Hover Micro-Interactions
+   ============================================ */
+.frame-the-all,
+.frame-patterns,
+.frame-dark-spiral,
+.frame-lightman {
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        filter 0.35s ease,
+        z-index 0s;
+    cursor: pointer;
+}
+
+/* On hover: card jumps to top layer */
+.frame-the-all:hover,
+.frame-patterns:hover,
+.frame-dark-spiral:hover,
+.frame-lightman:hover {
+    z-index: 100;
+    transform: scale(1.015);
+}
+
+.card-article,
+.card-bio {
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        box-shadow 0.35s ease,
+        filter 0.35s ease;
+    cursor: default;
+}
+
+.card-article:hover,
+.card-bio:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* ============================================
+   Grayscale effect — when a card is hovered,
+   all OTHER cards go grayscale.
+   Applied via JS class on .canvas
+   ============================================ */
+
+/* When canvas has a hovered-card class, dim all cards */
+.canvas.card-hovered .frame-patterns,
+.canvas.card-hovered .frame-dark-spiral,
+.canvas.card-hovered .frame-the-all,
+.canvas.card-hovered .frame-lightman,
+.canvas.card-hovered .card-article,
+.canvas.card-hovered .card-bio {
+    filter: grayscale(100%);
+    transition: filter 0.35s ease;
+}
+
+/* The actively hovered card stays colorful */
+.canvas.card-hovered .frame-patterns:hover,
+.canvas.card-hovered .frame-dark-spiral:hover,
+.canvas.card-hovered .frame-the-all:hover,
+.canvas.card-hovered .frame-lightman:hover {
+    filter: grayscale(0%);
+}
+
+/* Paired companion card also stays colorful
+   (class set by JS based on pairing) */
+.canvas.card-hovered .card--paired-active {
+    filter: grayscale(0%);
+}

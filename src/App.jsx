@@ -150,6 +150,20 @@ export default function App() {
   };
   const [view, setView] = useState(getInitialView());
 
+  // --- Image Preloading Logic ---
+  useEffect(() => {
+    const allImages = [
+      ...PROJECTS_IMAGES.map(img => img.src),
+      ...GRAPHICS_IMAGES.map(img => img.src),
+      ...PHOTOS_IMAGES.map(img => img.src),
+    ];
+    
+    allImages.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, []);
+
   useEffect(() => {
     const syncViewWithLocation = () => {
       setView(getInitialView());
@@ -719,7 +733,7 @@ export default function App() {
           <div className="card-bio__links">
             <a href="https://www.instagram.com/polymind_" target="_blank" rel="noreferrer">Instagram</a>
             <a href="https://www.x.com/Polymind_" target="_blank" rel="noreferrer">Twitter(X)</a>
-            <a href="https://substack.com" target="_blank" rel="noreferrer">Substack</a>
+            <a href="https://substack.com/@polymind45?r=5v0rm5&utm_campaign=profile&utm_medium=profile-page" target="_blank" rel="noreferrer">Substack</a>
             <a className="card-bio__email" href="mailto:yugansh.poly@gmail.com">yugansh.poly@gmail.com</a>
           </div>
         </>

@@ -133,8 +133,8 @@ const MOBILE_LAYOUT_DEFAULTS = {
   projectBtnRight: 20,
   projectBtnBottom: 92,
   projectBtnScale: 0.82,
-  projectAnchorX: 50,
-  projectAnchorY: 100,
+  projectAnchorX: 60,
+  projectAnchorY: 115,
 };
 
 export default function App() {

@@ -874,7 +874,7 @@ body {
 }
 
 .canvas-wrapper.is-mobile .mobile-card-slot+.mobile-card-slot {
-  margin-top: 26px;
+  margin-top: 0; /* Handled via inline styles for staggered layout */
 }
 
 /* Mobile-only button rendered outside the scaled card transform */

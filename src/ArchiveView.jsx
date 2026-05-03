@@ -68,7 +68,7 @@ const DIALKIT_ARCHIVE_DEFAULTS = {
   padding: {
     top: 108,
     right: 86,
-    bottom: 180,
+    bottom: 120,
     left: 86,
   },
   rowOffsets: {
@@ -79,8 +79,8 @@ const DIALKIT_ARCHIVE_DEFAULTS = {
     row5: 0,
   },
   blur: {
-    bottomStart: 140,
-    bottomEnd: 100,
+    bottomStart: 100,
+    bottomEnd: 40,
     rightStart: 120,
     rightEnd: 88,
   },
@@ -99,9 +99,9 @@ const DIALKIT_ARCHIVE_DEFAULTS = {
 const DIALKIT_ARCHIVE_MOBILE_DEFAULTS = {
   padding: {
     top: 84,
-    right: 50,
+    right: 0,
     bottom: 84,
-    left: 50,
+    left: 45,
   },
   rowOffsets: {
     graphics: 0,
@@ -113,8 +113,8 @@ const DIALKIT_ARCHIVE_MOBILE_DEFAULTS = {
   blur: {
     bottomStart: 80,
     bottomEnd: 40,
-    rightStart: 70,
-    rightEnd: 41,
+    rightStart: 25,
+    rightEnd: 5,
   },
   rowGap: 16,
   imageGap: 10,

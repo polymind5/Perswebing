@@ -120,7 +120,7 @@ const DIALKIT_LAYOUT_DEFAULTS = {
 const MOBILE_LAYOUT_DEFAULTS = {
   gap: 12,
   paddingX: 15,
-  paddingTop: 84,
+  paddingTop: 60,
   paddingBottom: 84,
   cardMaxWidth: 400,
   cardMinWidth: 310,
@@ -135,6 +135,16 @@ const MOBILE_LAYOUT_DEFAULTS = {
   projectBtnScale: 0.82,
   projectAnchorX: 50,
   projectAnchorY: 100,
+};
+
+const STAGGERED_MOBILE_LAYOUT = {
+  projects: { x: -20, mt: 0, w: 260 },
+  words: { x: 35, mt: -87, w: 240 },
+  graphics: { x: -35, mt: -10, w: 200 },
+  animations: { x: 59, mt: -29, w: 190 },
+  vision: { x: 10, mt: -8, w: 180 },
+  photos: { x: -15, mt: -10, w: 240 },
+  info: { x: 20, mt: -10, w: 240 },
 };
 
 export default function App() {
@@ -157,7 +167,7 @@ export default function App() {
       ...GRAPHICS_IMAGES.map(img => img.src),
       ...PHOTOS_IMAGES.map(img => img.src),
     ];
-    
+
     allImages.forEach((src) => {
       const img = new Image();
       img.src = src;
@@ -185,6 +195,9 @@ export default function App() {
     }
     setView(newView);
   };
+
+  const [activeMobileCard, setActiveMobileCard] = useState(null);
+  const [useNewMobileLayout, setUseNewMobileLayout] = useState(true); // Toggle for safety
 
   const [hoveredCard, setHoveredCard] = useState(null)
   const [isLinkHovered, setIsLinkHovered] = useState(false)
@@ -222,6 +235,38 @@ export default function App() {
 
   const springTiltX = useSpring(tiltX, { stiffness: 400, damping: 40 });
   const springTiltY = useSpring(tiltY, { stiffness: 400, damping: 40 });
+
+  // --- Gyroscope Tilt (Mobile Only) ---
+  const gyroBeta = useMotionValue(0)
+  const gyroGamma = useMotionValue(0)
+  const springGyroX = useSpring(gyroBeta, { stiffness: 150, damping: 25 })
+  const springGyroY = useSpring(gyroGamma, { stiffness: 150, damping: 25 })
+
+  const handleOrientation = useCallback((e) => {
+    // beta: front-back tilt (-180 to 180)
+    // gamma: left-right tilt (-90 to 90)
+    const b = e.beta || 0;
+    const g = e.gamma || 0;
+    // Map orientation to rotation: phone at ~45 deg is "flat" for beta
+    // and 0 for gamma.
+    const rotationX = Math.max(-25, Math.min(25, (b - 45) * 0.8));
+    const rotationY = Math.max(-25, Math.min(25, g * 0.8));
+    gyroBeta.set(rotationX);
+    gyroGamma.set(rotationY);
+  }, [gyroBeta, gyroGamma]);
+
+  const requestGyroPermission = async () => {
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      try {
+        const permission = await DeviceOrientationEvent.requestPermission();
+        if (permission === 'granted') {
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
+      } catch (err) { console.error(err); }
+    } else {
+      window.addEventListener('deviceorientation', handleOrientation);
+    }
+  };
 
   // Shine reflection — map mouse position to gradient center (0–100%)
   const shineX = useTransform(rawMouseX, v => {
@@ -298,8 +343,10 @@ export default function App() {
       cardStateRef.current = 'thrown';
       setCardState('thrown');
       cardTargetX.set(window.innerWidth / 2);
-      cardTargetY.set(window.innerHeight / 2);
       cardRotateTarget.set(0); // straighten out when thrown
+      if (isMobile) {
+        requestGyroPermission();
+      }
     } else if (cardStateRef.current === 'thrown') {
       returnCardToDot();
     }
@@ -335,13 +382,13 @@ export default function App() {
   const mobileControls = MOBILE_LAYOUT_DEFAULTS;
 
   const CARDS_LAYOUT = {
-    projects: { w: 420, h: 420, x: 190, y: 50 },
-    animations: { w: 340, h: 340, x: 590, y: 190 },
-    graphics: { w: 350, h: 350, x: 310, y: 500 },
-    photos: { w: 390, h: 390, x: 910, y: 380 },
-    words: { w: 350, h: 190, x: 920, y: 100 },
-    info: { w: 390, h: 230, x: 710, y: 650 },
-    vision: { w: 290, h: 160, x: 95, y: 420 },
+    projects: { name: 'projects', w: 420, h: 420, x: 190, y: 50 },
+    animations: { name: 'animations', w: 340, h: 340, x: 590, y: 190 },
+    graphics: { name: 'graphics', w: 350, h: 350, x: 310, y: 500 },
+    photos: { name: 'photos', w: 390, h: 390, x: 910, y: 380 },
+    words: { name: 'words', w: 350, h: 190, x: 920, y: 100 },
+    info: { name: 'info', w: 390, h: 230, x: 710, y: 650 },
+    vision: { name: 'vision', w: 290, h: 160, x: 95, y: 420 },
   }
 
   const layout = { ...layoutControls, ...CARDS_LAYOUT }
@@ -494,28 +541,42 @@ export default function App() {
   )
 
   const mobileSlotStyle = (lp) => {
-    const scale = mobileUniformWidth / lp.w
+    const targetW = (isMobile && useNewMobileLayout)
+      ? (STAGGERED_MOBILE_LAYOUT[lp.name]?.w || mobileUniformWidth)
+      : mobileUniformWidth;
+    const scale = targetW / lp.w;
+
     return {
       position: 'relative',
-      width: mobileUniformWidth,
+      width: targetW,
       height: lp.h * scale,
       flex: '0 0 auto',
+      zIndex: activeMobileCard === lp.name ? 500 : (lp.name === 'vision' ? 101 : 1),
+      marginTop: isMobile && useNewMobileLayout ? (STAGGERED_MOBILE_LAYOUT[lp.name]?.mt || 0) : 0,
+      transform: isMobile && useNewMobileLayout ? `translateX(${STAGGERED_MOBILE_LAYOUT[lp.name]?.x || 0}px)` : 'none',
+      transition: 'z-index 0.3s step-end, transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+    };
+  };
+
+  const mobileScaledCardStyle = (lp) => {
+    const targetW = (isMobile && useNewMobileLayout)
+      ? (STAGGERED_MOBILE_LAYOUT[lp.name]?.w || mobileUniformWidth)
+      : mobileUniformWidth;
+
+    return {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      width: lp.w,
+      height: lp.h,
+      transform: `scale(${targetW / lp.w})`,
+      transformOrigin: 'top left',
+      zIndex: 1,
+      filter: 'none',
+      cursor: 'auto',
+      overflow: 'visible',
     }
   }
-
-  const mobileScaledCardStyle = (lp) => ({
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    width: lp.w,
-    height: lp.h,
-    transform: `scale(${mobileUniformWidth / lp.w})`,
-    transformOrigin: 'top left',
-    zIndex: 1,
-    filter: 'none',
-    cursor: 'auto',
-    overflow: 'visible',
-  })
 
   const projectsCard = (style) => (
     <div
@@ -886,48 +947,103 @@ export default function App() {
                 </AnimatePresence>
 
                 {isMobile ? (
-                  <>
-                    <div className="mobile-card-slot" style={{ ...mobileSlotStyle(layout.projects), overflow: 'visible' }}>
-                      {projectsCard(mobileScaledCardStyle(layout.projects))}
-                      {PROJECTS_IMAGES[projectIdx].link && (
-                        <a
-                          href={PROJECTS_IMAGES[projectIdx].link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mobile-view-project-btn"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <span className="mobile-view-project-btn__text">
-                            View
-                            <svg className="mobile-view-project-btn__icon" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <circle cx="12" cy="12" r="10" />
-                              <polyline points="12 16 16 12 12 8" />
-                              <line x1="8" y1="12" x2="16" y2="12" />
-                            </svg>
-                            <br />Project
-                          </span>
-                        </a>
-                      )}
-                    </div>
-                    <div className="mobile-card-slot" style={mobileSlotStyle(layout.info)}>
-                      {infoCard(mobileScaledCardStyle(layout.info))}
-                    </div>
-                    <div className="mobile-card-slot" style={mobileSlotStyle(layout.graphics)}>
-                      {graphicsCard(mobileScaledCardStyle(layout.graphics))}
-                    </div>
-                    <div className="mobile-card-slot" style={mobileSlotStyle(layout.animations)}>
-                      {animationsCard(mobileScaledCardStyle(layout.animations))}
-                    </div>
-                    <div className="mobile-card-slot" style={mobileSlotStyle(layout.vision)}>
-                      {visionCard(mobileScaledCardStyle(layout.vision))}
-                    </div>
-                    <div className="mobile-card-slot" style={mobileSlotStyle(layout.photos)}>
-                      {photosCard(mobileScaledCardStyle(layout.photos))}
-                    </div>
-                    <div className="mobile-card-slot" style={mobileSlotStyle(layout.words)}>
-                      {wordsCard(mobileScaledCardStyle(layout.words))}
-                    </div>
-                  </>
+                  useNewMobileLayout ? (
+                    /* ─── NEW STAGGERED LAYOUT ─── */
+                    <>
+                      <div className="mobile-card-slot"
+                        style={{ ...mobileSlotStyle(layout.projects), overflow: 'visible' }}
+                        onClickCapture={() => setActiveMobileCard('projects')}
+                      >
+                        {projectsCard(mobileScaledCardStyle(layout.projects))}
+                      </div>
+
+                      <div className="mobile-card-slot"
+                        style={{ ...mobileSlotStyle(layout.words), overflow: 'visible' }}
+                        onClickCapture={() => setActiveMobileCard('words')}
+                      >
+                        {wordsCard(mobileScaledCardStyle(layout.words))}
+                      </div>
+
+                      <div className="mobile-card-slot"
+                        style={{ ...mobileSlotStyle(layout.graphics), overflow: 'visible' }}
+                        onClickCapture={() => setActiveMobileCard('graphics')}
+                      >
+                        {graphicsCard(mobileScaledCardStyle(layout.graphics))}
+                      </div>
+
+                      <div className="mobile-card-slot"
+                        style={{ ...mobileSlotStyle(layout.animations), overflow: 'visible' }}
+                        onClickCapture={() => setActiveMobileCard('animations')}
+                      >
+                        {animationsCard(mobileScaledCardStyle(layout.animations))}
+                      </div>
+
+                      <div className="mobile-card-slot"
+                        style={{ ...mobileSlotStyle(layout.vision), overflow: 'visible' }}
+                        onClickCapture={() => setActiveMobileCard('vision')}
+                      >
+                        {visionCard(mobileScaledCardStyle(layout.vision))}
+                      </div>
+
+                      <div className="mobile-card-slot"
+                        style={{ ...mobileSlotStyle(layout.photos), overflow: 'visible' }}
+                        onClickCapture={() => setActiveMobileCard('photos')}
+                      >
+                        {photosCard(mobileScaledCardStyle(layout.photos))}
+                      </div>
+
+                      <div className="mobile-card-slot"
+                        style={{ ...mobileSlotStyle(layout.info), overflow: 'visible' }}
+                        onClickCapture={() => setActiveMobileCard('info')}
+                      >
+                        {infoCard(mobileScaledCardStyle(layout.info))}
+                      </div>
+                    </>
+                  ) : (
+                    /* ─── LEGACY STACK LAYOUT ─── */
+                    <>
+                      <div className="mobile-card-slot" style={{ ...mobileSlotStyle(layout.projects), overflow: 'visible' }}>
+                        {projectsCard(mobileScaledCardStyle(layout.projects))}
+                        {PROJECTS_IMAGES[projectIdx].link && (
+                          <a
+                            href={PROJECTS_IMAGES[projectIdx].link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mobile-view-project-btn"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span className="mobile-view-project-btn__text">
+                              View
+                              <svg className="mobile-view-project-btn__icon" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 16 16 12 12 8" />
+                                <line x1="8" y1="12" x2="16" y2="12" />
+                              </svg>
+                              <br />Project
+                            </span>
+                          </a>
+                        )}
+                      </div>
+                      <div className="mobile-card-slot" style={mobileSlotStyle(layout.info)}>
+                        {infoCard(mobileScaledCardStyle(layout.info))}
+                      </div>
+                      <div className="mobile-card-slot" style={mobileSlotStyle(layout.graphics)}>
+                        {graphicsCard(mobileScaledCardStyle(layout.graphics))}
+                      </div>
+                      <div className="mobile-card-slot" style={mobileSlotStyle(layout.animations)}>
+                        {animationsCard(mobileScaledCardStyle(layout.animations))}
+                      </div>
+                      <div className="mobile-card-slot" style={mobileSlotStyle(layout.vision)}>
+                        {visionCard(mobileScaledCardStyle(layout.vision))}
+                      </div>
+                      <div className="mobile-card-slot" style={mobileSlotStyle(layout.photos)}>
+                        {photosCard(mobileScaledCardStyle(layout.photos))}
+                      </div>
+                      <div className="mobile-card-slot" style={mobileSlotStyle(layout.words)}>
+                        {wordsCard(mobileScaledCardStyle(layout.words))}
+                      </div>
+                    </>
+                  )
                 ) : (
                   <>
                     {projectsCard(cardStyle('projects', layout.projects))}
@@ -1103,8 +1219,8 @@ export default function App() {
           <motion.div
             className="interactive-card-parallax-layer"
             style={{
-              rotateX: cardState === 'thrown' ? springTiltX : 0,
-              rotateY: cardState === 'thrown' ? springTiltY : 0,
+              rotateX: cardState === 'thrown' ? (isMobile ? springGyroX : springTiltX) : 0,
+              rotateY: cardState === 'thrown' ? (isMobile ? springGyroY : springTiltY) : 0,
             }}
           >
             <div className={`interactive-card-inner ${isCardFlipped ? 'is-flipped' : ''}`}>

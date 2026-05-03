@@ -123,7 +123,7 @@ const MOBILE_LAYOUT_DEFAULTS = {
   paddingTop: 60,
   paddingBottom: 84,
   cardMaxWidth: 400,
-  cardMinWidth: 310,
+  cardMinWidth: 270,
   cardInset: 58,
   dotSize: 20,
   dotInset: 20,
@@ -133,8 +133,8 @@ const MOBILE_LAYOUT_DEFAULTS = {
   projectBtnRight: 20,
   projectBtnBottom: 92,
   projectBtnScale: 0.82,
-  projectAnchorX: 50,
-  projectAnchorY: 100,
+  projectAnchorX: 60,
+  projectAnchorY: 115,
 };
 
 const STAGGERED_MOBILE_LAYOUT = {

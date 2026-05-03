@@ -141,7 +141,7 @@ const STAGGERED_MOBILE_LAYOUT = {
   projects: { x: -20, mt: 0, w: 260 },
   words: { x: 35, mt: -87, w: 240 },
   graphics: { x: -35, mt: -10, w: 200 },
-  animations: { x: 59, mt: -29, w: 190 },
+  animations: { x: 52, mt: -29, w: 190 },
   vision: { x: 10, mt: -8, w: 180 },
   photos: { x: -15, mt: -10, w: 240 },
   info: { x: 20, mt: -10, w: 240 },
@@ -247,13 +247,21 @@ export default function App() {
     // gamma: left-right tilt (-90 to 90)
     const b = e.beta || 0;
     const g = e.gamma || 0;
+
     // Map orientation to rotation: phone at ~45 deg is "flat" for beta
-    // and 0 for gamma.
     const rotationX = Math.max(-25, Math.min(25, (b - 45) * 0.8));
     const rotationY = Math.max(-25, Math.min(25, g * 0.8));
     gyroBeta.set(rotationX);
     gyroGamma.set(rotationY);
-  }, [gyroBeta, gyroGamma]);
+
+    // Position Float (only when thrown and on mobile)
+    if (window.innerWidth < 768 && cardStateRef.current === 'thrown') {
+      const offsetX = g * 0.75;
+      const offsetY = (b - 45) * 0.75;
+      cardTargetX.set(window.innerWidth / 2 + offsetX);
+      cardTargetY.set(window.innerHeight / 2 + offsetY);
+    }
+  }, [gyroBeta, gyroGamma, cardTargetX, cardTargetY]);
 
   const requestGyroPermission = async () => {
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -554,7 +562,7 @@ export default function App() {
       zIndex: activeMobileCard === lp.name ? 500 : (lp.name === 'vision' ? 101 : 1),
       marginTop: isMobile && useNewMobileLayout ? (STAGGERED_MOBILE_LAYOUT[lp.name]?.mt || 0) : 0,
       transform: isMobile && useNewMobileLayout ? `translateX(${STAGGERED_MOBILE_LAYOUT[lp.name]?.x || 0}px)` : 'none',
-      transition: 'z-index 0.3s step-end, transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+      transition: 'z-index 0.01s step-start, transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
     };
   };
 
@@ -955,6 +963,25 @@ export default function App() {
                         onClickCapture={() => setActiveMobileCard('projects')}
                       >
                         {projectsCard(mobileScaledCardStyle(layout.projects))}
+                        {PROJECTS_IMAGES[projectIdx]?.link && (
+                          <a
+                            href={PROJECTS_IMAGES[projectIdx].link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mobile-view-project-btn"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span className="mobile-view-project-btn__text">
+                              View
+                              <svg className="mobile-view-project-btn__icon" viewBox="0 0 24 24" fill="none" stroke="#1E1E1E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 16 16 12 12 8" />
+                                <line x1="8" y1="12" x2="16" y2="12" />
+                              </svg>
+                              <br />Project
+                            </span>
+                          </a>
+                        )}
                       </div>
 
                       <div className="mobile-card-slot"

@@ -351,6 +351,7 @@ export default function App() {
       cardStateRef.current = 'thrown';
       setCardState('thrown');
       cardTargetX.set(window.innerWidth / 2);
+      cardTargetY.set(window.innerHeight / 2);
       cardRotateTarget.set(0); // straighten out when thrown
       if (isMobile) {
         requestGyroPermission();

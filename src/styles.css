@@ -684,7 +684,15 @@ body {
   height: 100%;
   background: white;
   z-index: 1050;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  pointer-events: auto;
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - var(--ideo-blur-bottom-start, 100px)), transparent calc(100% - var(--ideo-blur-bottom-end, 40px)));
+  mask-image: linear-gradient(to bottom, black calc(100% - var(--ideo-blur-bottom-start, 100px)), transparent calc(100% - var(--ideo-blur-bottom-end, 40px)));
+}
+
+.ideology-view::-webkit-scrollbar {
+  display: none;
 }
 
 .ideology-unit {
@@ -946,35 +954,32 @@ body {
 /* ============================================
    Ideology Mobile Layout
    ============================================ */
-.ideology-view.is-mobile {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  padding: 96px 60px 180px;
-  gap: 80px;
-  overflow-y: auto;
-  height: 100vh;
-}
 
-.ideology-view.is-mobile .ideology-unit {
-  position: relative !important;
-  left: auto !important;
-  top: auto !important;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+/* Ideology View Scrolling & Masking */
+.ideology-view {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
+  height: 100%;
+  background: white;
+  z-index: 1050;
+  overflow-y: auto;
+  overflow-x: hidden;
+  pointer-events: auto;
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - var(--ideo-blur-bottom-start, 100px)), transparent calc(100% - var(--ideo-blur-bottom-end, 40px)));
+  mask-image: linear-gradient(to bottom, black calc(100% - var(--ideo-blur-bottom-start, 100px)), transparent calc(100% - var(--ideo-blur-bottom-end, 40px)));
 }
 
-.ideology-view.is-mobile .ideology-big-word {
-  position: relative !important;
-  left: auto !important;
-  top: auto !important;
+.ideology-view::-webkit-scrollbar {
+  display: none;
 }
 
-.ideology-view.is-mobile .ideology-body {
-  position: relative !important;
-  left: auto !important;
-  top: auto !important;
-  padding-left: 20px;
+.ideology-unit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }

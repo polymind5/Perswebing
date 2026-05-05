@@ -53,8 +53,7 @@ const DESKTOP_DEFAULT_PHOTO_INDEX = PHOTOS_IMAGES.findIndex((image) => image.tit
 const MOBILE_DEFAULT_PHOTO_INDEX = PHOTOS_IMAGES.findIndex((image) => image.title === 'Demol')
 
 const WORDS_ARTICLES = [
-  { title: 'The Question is the First Answer', desc: '"What do you want to know?", starts the cycle of curiosity as being the question zero.', link: '#' },
-  { title: 'Have we all become impressionists now?', desc: 'We live in an era of impressionism.', link: '#' },
+  { title: 'The Question is the First Answer', desc: '"What do you want to know?", starts the cycle of curiosity as being the question zero.', link: 'https://open.substack.com/pub/polymind45/p/the-question-is-the-first-answer?r=5v0rm5&utm_campaign=post&utm_medium=web&showWelcomeOnShare=true' },
 ]
 const DIALKIT_LAYOUT_DEFAULTS = {
   canvasW: 1440,

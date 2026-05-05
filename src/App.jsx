@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'motion/react'
 import ArchiveView from './ArchiveView'
 import IdeologyView from './IdeologyView'
+import { Analytics } from '@vercel/analytics/react'
 
 /* ============================================
    Image data — each card's cycleable images
@@ -1285,6 +1286,7 @@ export default function App() {
         document.body
       )}
       {/* Agentation removed for production */}
+      <Analytics />
     </>
   )
 }

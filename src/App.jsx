@@ -25,8 +25,8 @@ const GRAPHICS_IMAGES = [
   { src: '/images/Graphics/Flowing.webp', title: 'Flowing', desc: 'Depth mapped experimental gradient.', dark: false },
   { src: '/images/Graphics/And.webp', title: 'And', desc: 'Combining the forms of a ampersand, a At symbol and a abstract bird for a experimental type foundry logo.', dark: true },
   { src: '/images/Graphics/Ambiguity.webp', title: 'Ambiguity', desc: 'Illustration for the concept of ambiguity; one of the interesting ones at that.', dark: false },
+  { src: '/images/Graphics/TIFI.webp', title: 'TIFI', desc: 'Logo exploations for a new age publisher, inspired by japanese paper lamps, Chōchin.', dark: false },
   { src: '/images/Graphics/So many ways to live.webp', title: 'So Many Ways to Live', desc: 'Sketch of a man seeing the paths in front of him, changing his face itself as he observes more.', dark: false },
-  { src: '/images/Graphics/TIFI.webp', title: 'TIFI', desc: 'Experimental graphic exploration.', dark: false },
 ]
 
 const PHOTOS_IMAGES = [

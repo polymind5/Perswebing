@@ -49,6 +49,7 @@ const GRAPHICS_2_ROW = [
   { src: '/images/Archive/Graphics 2/Funny man.webp', alt: 'Funny man' },
   { src: '/images/Archive/Graphics 2/IDI.webp', alt: 'IDI' },
   { src: '/images/Archive/Graphics 2/Line face.webp', alt: 'Line face' },
+  { src: '/images/Archive/Graphics 2/System Defiant expo.webp', alt: 'System Defiant expo' },
 ]
 
 const GRAPHICS_3_ROW = [

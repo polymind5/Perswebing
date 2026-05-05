@@ -99,7 +99,7 @@ const DIALKIT_IDEOLOGY_MOBILE_DEFAULTS = {
     activeWordX: '50%',
   },
   intent: {
-    textX: '62%',
+    textX: '54%',
     textY: 260,
     wordX: '50%',
     wordY: 225,

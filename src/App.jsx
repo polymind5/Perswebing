@@ -603,7 +603,6 @@ export default function App() {
       <img
         src={PROJECTS_IMAGES[projectIdx].src}
         alt={PROJECTS_IMAGES[projectIdx].title}
-        key={PROJECTS_IMAGES[projectIdx].src}
       />
       <div className="card-label card-label--tl">Projects</div>
       <a
@@ -648,7 +647,6 @@ export default function App() {
     >
       <div className="frame-card-media-wrapper">
         <video
-          key={ANIMATIONS_VIDEOS[animationIdx].src}
           src={ANIMATIONS_VIDEOS[animationIdx].src}
           autoPlay
           muted
@@ -707,7 +705,6 @@ export default function App() {
       <img
         src={GRAPHICS_IMAGES[graphicIdx].src}
         alt={GRAPHICS_IMAGES[graphicIdx].title}
-        key={GRAPHICS_IMAGES[graphicIdx].src}
       />
       <div className="card-label card-label--bl">Graphics</div>
     </div>
@@ -725,7 +722,6 @@ export default function App() {
         <img
           src={PHOTOS_IMAGES[photoIdx].src}
           alt={PHOTOS_IMAGES[photoIdx].title}
-          key={PHOTOS_IMAGES[photoIdx].src}
         />
         {effectivePairedTarget === 'photos' && companion && (
           <div className="companion-text">

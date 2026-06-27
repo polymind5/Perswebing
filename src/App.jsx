@@ -5,6 +5,7 @@ import ArchiveView from './ArchiveView'
 import IdeologyView from './IdeologyView'
 import { Analytics } from '@vercel/analytics/react'
 
+
 /* ============================================
    Image data — each card's cycleable images
    with titles for the companion text card
@@ -147,6 +148,93 @@ const STAGGERED_MOBILE_LAYOUT = {
   photos: { x: -15, mt: -10, w: 240 },
   info: { x: 20, mt: -10, w: 240 },
 };
+
+/* ──────────────────────────────────────────────
+   Vertical Indicator Dots Component (Option 1)
+   With progressive shrinking like Instagram
+   ────────────────────────────────────────────── */
+function CardDots({ total, current, positionClass, isDark }) {
+  if (total <= 1) return null;
+
+  const maxVisible = 5;
+  const useScrolling = total > maxVisible;
+
+  // Height of each dot cell = 6px dot + 6px gap = 12px
+  // If scrolling, we shift the container to keep active dot centered
+  let translateY = 0;
+  if (useScrolling) {
+    let targetTranslate = -(current - 2) * 12;
+    // Clamp so we don't scroll past boundaries
+    translateY = Math.min(0, Math.max(-(total - maxVisible) * 12, targetTranslate));
+  }
+
+  const dots = [];
+  for (let i = 0; i < total; i++) {
+    const diff = i - current;
+    const absDiff = Math.abs(diff);
+
+    let scale = 1;
+    let opacity = 0.6;
+
+    if (useScrolling) {
+      if (absDiff === 0) {
+        scale = 1.0;
+        opacity = 1.0;
+      } else if (absDiff === 1) {
+        scale = 0.8;
+        opacity = 0.6;
+      } else if (absDiff === 2) {
+        scale = 0.5;
+        opacity = 0.3;
+      } else {
+        scale = 0.0;
+        opacity = 0.0;
+      }
+    } else {
+      if (absDiff === 0) {
+        scale = 1.0;
+        opacity = 1.0;
+      } else {
+        scale = 0.8;
+        opacity = 0.4;
+      }
+    }
+
+    dots.push(
+      <span
+        key={i}
+        className="card-dot"
+        style={{
+          backgroundColor: isDark ? '#ffffff' : '#000000',
+          transform: `scale(${scale})`,
+          opacity: opacity,
+        }}
+      />
+    );
+  }
+
+  return (
+    <div
+      className={`card-dots ${positionClass}`}
+      style={{
+        height: useScrolling ? `${maxVisible * 12 - 6}px` : 'auto',
+        overflow: useScrolling ? 'hidden' : 'visible',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px',
+          transform: `translateY(${translateY}px)`,
+          transition: 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        }}
+      >
+        {dots}
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   const canvasRef = useRef(null)
@@ -506,6 +594,24 @@ export default function App() {
     }
   }
 
+  const getHoveredCardProgress = () => {
+    if (!hoveredCard) return { current: 0, total: 1 };
+    switch (hoveredCard) {
+      case 'projects':
+        return { current: projectIdx, total: PROJECTS_IMAGES.length };
+      case 'animations':
+        return { current: animationIdx, total: ANIMATIONS_VIDEOS.length };
+      case 'graphics':
+        return { current: graphicIdx, total: GRAPHICS_IMAGES.length };
+      case 'photos':
+        return { current: photoIdx, total: PHOTOS_IMAGES.length };
+      case 'words':
+        return { current: wordIdx, total: WORDS_ARTICLES.length };
+      default:
+        return { current: 0, total: 1 };
+    }
+  };
+
   /* helper: inline style for a positioned card */
   const cardStyle = (cardName, lp) => {
     const overrideCursor = changingMechanismCards.includes(cardName) && !isLinkHovered;
@@ -605,6 +711,7 @@ export default function App() {
         alt={PROJECTS_IMAGES[projectIdx].title}
       />
       <div className="card-label card-label--tl">Projects</div>
+      <CardDots total={PROJECTS_IMAGES.length} current={projectIdx} positionClass="card-dots--tl" isDark={PROJECTS_IMAGES[projectIdx].dark} />
       <a
         href={PROJECTS_IMAGES[projectIdx].link || '#'}
         target={PROJECTS_IMAGES[projectIdx].link ? '_blank' : undefined}
@@ -662,6 +769,7 @@ export default function App() {
         )}
       </div>
       <div className="card-label card-label--tl">Animations</div>
+      <CardDots total={ANIMATIONS_VIDEOS.length} current={animationIdx} positionClass="card-dots--tl" isDark={ANIMATIONS_VIDEOS[animationIdx].dark} />
     </div>
   )
 
@@ -707,6 +815,7 @@ export default function App() {
         alt={GRAPHICS_IMAGES[graphicIdx].title}
       />
       <div className="card-label card-label--bl">Graphics</div>
+      <CardDots total={GRAPHICS_IMAGES.length} current={graphicIdx} positionClass="card-dots--bl" isDark={GRAPHICS_IMAGES[graphicIdx].dark} />
     </div>
   )
 
@@ -732,6 +841,7 @@ export default function App() {
         )}
       </div>
       <div className="card-label card-label--tr">Photos</div>
+      <CardDots total={PHOTOS_IMAGES.length} current={photoIdx} positionClass="card-dots--tr" isDark={PHOTOS_IMAGES[photoIdx].dark} />
     </div>
   )
 
@@ -744,6 +854,7 @@ export default function App() {
       onClick={() => setWordIdx((i) => (i + 1) % WORDS_ARTICLES.length)}
     >
       <div className="card-label card-label--tr">Words</div>
+      <CardDots total={WORDS_ARTICLES.length} current={wordIdx} positionClass="card-dots--tr" isDark={false} />
       {effectivePairedTarget === 'words' && companion ? (
         <div className="companion-text companion-text--article">
           <h3 className="companion-text__title">{companion.title}</h3>
@@ -832,21 +943,38 @@ export default function App() {
               exit={{ opacity: 0, scale: 0.2 }}
               transition={{ duration: 0.15 }}
               style={{
-                width: 15,
-                height: 15,
-                display: 'block'
+                width: 20,
+                height: 20,
+                display: 'block',
+                overflow: 'visible'
               }}
               viewBox="0 0 100 100"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <circle cx="50" cy="50" r="48" fill="black" stroke={isCurrentCardDark() ? "white" : "black"} strokeWidth="3" style={{ transition: 'stroke 0.2s' }} />
-              <path
-                d="M85.3506 15.3555C89.7814 19.877 93.3076 25.2048 95.7314 31.0566C97.7124 35.8394 98.929 40.8958 99.3418 46.04C99.4288 47.1304 99.4806 48.2245 99.4951 49.3203C99.504 50.0163 99.5 50.7139 99.4805 51.4102L99.4551 52.1064C99.428 52.7255 99.3911 53.3434 99.3418 53.96C98.929 59.1038 97.7124 64.1606 95.7314 68.9434C93.3077 74.7944 89.781 80.1216 85.3506 84.6426L80.7539 80.0469C84.5813 76.1294 87.6295 71.518 89.7266 66.4551C91.3696 62.4886 92.4065 58.3057 92.8096 54.0469L92.8613 53.5H50.5V46.5H92.8613L92.8096 45.9531C92.4065 41.6938 91.3696 37.5114 89.7266 33.5449C87.6294 28.4819 84.5824 23.8691 80.7549 19.9512L85.3506 15.3555Z"
-                fill="white"
-                stroke={isCurrentCardDark() ? "white" : "black"}
-                strokeWidth="2"
-                style={{ transition: 'stroke 0.2s' }}
+              <g transform="translate(10, 10) scale(0.8)">
+                <circle cx="50" cy="50" r="48" fill="black" stroke={isCurrentCardDark() ? "white" : "black"} strokeWidth="3" style={{ transition: 'stroke 0.2s' }} />
+                <path
+                  d="M85.3506 15.3555C89.7814 19.877 93.3076 25.2048 95.7314 31.0566C97.7124 35.8394 98.929 40.8958 99.3418 46.04C99.4288 47.1304 99.4806 48.2245 99.4951 49.3203C99.504 50.0163 99.5 50.7139 99.4805 51.4102L99.4551 52.1064C99.428 52.7255 99.3911 53.3434 99.3418 53.96C98.929 59.1038 97.7124 64.1606 95.7314 68.9434C93.3077 74.7944 89.781 80.1216 85.3506 84.6426L80.7539 80.0469C84.5813 76.1294 87.6295 71.518 89.7266 66.4551C91.3696 62.4886 92.4065 58.3057 92.8096 54.0469L92.8613 53.5H50.5V46.5H92.8613L92.8096 45.9531C92.4065 41.6938 91.3696 37.5114 89.7266 33.5449C87.6294 28.4819 84.5824 23.8691 80.7549 19.9512L85.3506 15.3555Z"
+                  fill="white"
+                  stroke={isCurrentCardDark() ? "white" : "black"}
+                  strokeWidth="2"
+                  style={{ transition: 'stroke 0.2s' }}
+                />
+              </g>
+              <circle
+                cx="50"
+                cy="50"
+                r="46"
+                stroke="#ff1457"
+                strokeWidth="8"
+                strokeLinecap="round"
+                strokeDasharray="289.026"
+                strokeDashoffset={289.026 - ((getHoveredCardProgress().current + 1) / getHoveredCardProgress().total) * 289.026}
+                transform="rotate(-90 50 50)"
+                style={{
+                  transition: 'stroke-dashoffset 0.25s ease',
+                }}
               />
             </motion.svg>
           )}

@@ -173,6 +173,48 @@ body {
   transform: translateX(var(--label-end, 5px));
 }
 
+/* ============================================
+   Vertical Indicator Dots (Option 1)
+   ============================================ */
+.card-dots {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--label-speed, 0.35s) ease;
+  z-index: 10;
+}
+
+/* Fade in only on hovering the parent card */
+.frame-card:hover .card-dots,
+.card-article:hover .card-dots {
+  opacity: 1;
+}
+
+/* Positioning next to the labels inside the card boundaries */
+.card-dots--tl {
+  left: 14px;
+  top: 14px;
+}
+
+.card-dots--bl {
+  left: 14px;
+  bottom: 14px;
+}
+
+.card-dots--tr {
+  right: 14px;
+  top: 14px;
+}
+
+.card-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  transition: transform 0.25s ease, opacity 0.25s ease, background-color 0.2s ease;
+  display: inline-block;
+}
+
+
 
 
 /* ============================================
@@ -845,8 +887,9 @@ body {
 }
 
 /* Hide desktop-only features on mobile */
-.canvas-wrapper.is-mobile .card-label {
-  display: none;
+.canvas-wrapper.is-mobile .card-label,
+.canvas-wrapper.is-mobile .card-dots {
+  display: none !important;
 }
 
 /* Reset hover scale on mobile (no hover on touch) */
@@ -882,7 +925,8 @@ body {
 }
 
 .canvas-wrapper.is-mobile .mobile-card-slot+.mobile-card-slot {
-  margin-top: 0; /* Handled via inline styles for staggered layout */
+  margin-top: 0;
+  /* Handled via inline styles for staggered layout */
 }
 
 /* Mobile-only button rendered outside the scaled card transform */

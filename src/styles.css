@@ -214,6 +214,28 @@ body {
   display: inline-block;
 }
 
+/* Tap to cycle hint on mobile - rotated 90 degrees anti-clockwise and placed below dots */
+.tap-hint {
+  position: absolute;
+  left: calc(50% - 1px);
+
+  top: calc(100% + 36px);
+  transform: translate(-50%, -50%) rotate(-90deg);
+  transform-origin: center center;
+  white-space: nowrap;
+  font-family: 'Michroma', sans-serif;
+  font-size: 9px;
+  color: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 12;
+  transition: opacity 0.3s ease;
+}
+
+/* On dark card backgrounds, show lighter text */
+.is-dark-card .tap-hint {
+  color: rgba(255, 255, 255, 0.5);
+}
+
 
 
 
@@ -887,9 +909,41 @@ body {
 }
 
 /* Hide desktop-only features on mobile */
-.canvas-wrapper.is-mobile .card-label,
-.canvas-wrapper.is-mobile .card-dots {
+.canvas-wrapper.is-mobile .card-label {
   display: none !important;
+}
+
+/* Force mobile dots to be visible and set their styles/positions on mobile */
+.canvas-wrapper.is-mobile .card-dots {
+  opacity: 1 !important;
+  display: flex !important;
+  pointer-events: none;
+}
+
+.canvas-wrapper.is-mobile .card-dot {
+  width: 4px !important;
+  height: 4px !important;
+}
+
+/* Placements: top-left on projects, graphics, and photos */
+.canvas-wrapper.is-mobile .projects-card .card-dots,
+.canvas-wrapper.is-mobile .graphics-card .card-dots,
+.canvas-wrapper.is-mobile .photos-card .card-dots {
+  left: 12px !important;
+  top: 12px !important;
+  right: auto !important;
+  bottom: auto !important;
+  flex-direction: column !important;
+}
+
+/* Placements: center-right on animations */
+.canvas-wrapper.is-mobile .animations-card .card-dots {
+  right: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  left: auto !important;
+  bottom: auto !important;
+  flex-direction: column !important;
 }
 
 /* Reset hover scale on mobile (no hover on touch) */

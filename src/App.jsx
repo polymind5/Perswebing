@@ -153,19 +153,23 @@ const STAGGERED_MOBILE_LAYOUT = {
    Vertical Indicator Dots Component (Option 1)
    With progressive shrinking like Instagram
    ────────────────────────────────────────────── */
-function CardDots({ total, current, positionClass, isDark }) {
+function CardDots({ total, current, positionClass, isDark, isMobile, showTapHint, tapHintAlign = 'left' }) {
   if (total <= 1) return null;
 
   const maxVisible = 5;
   const useScrolling = total > maxVisible;
 
-  // Height of each dot cell = 6px dot + 6px gap = 12px
+  const dotSize = isMobile ? 4 : 6;
+  const gap = isMobile ? 4 : 6;
+  const step = dotSize + gap;
+
+  // Height of each dot cell = dotSize + gap
   // If scrolling, we shift the container to keep active dot centered
   let translateY = 0;
   if (useScrolling) {
-    let targetTranslate = -(current - 2) * 12;
+    let targetTranslate = -(current - 2) * step;
     // Clamp so we don't scroll past boundaries
-    translateY = Math.min(0, Math.max(-(total - maxVisible) * 12, targetTranslate));
+    translateY = Math.min(0, Math.max(-(total - maxVisible) * step, targetTranslate));
   }
 
   const dots = [];
@@ -215,23 +219,37 @@ function CardDots({ total, current, positionClass, isDark }) {
 
   return (
     <div
-      className={`card-dots ${positionClass}`}
+      className={`card-dots ${positionClass} ${isDark ? 'is-dark-card' : ''}`}
       style={{
-        height: useScrolling ? `${maxVisible * 12 - 6}px` : 'auto',
-        overflow: useScrolling ? 'hidden' : 'visible',
+        overflow: 'visible',
       }}
     >
       <div
         style={{
+          height: useScrolling ? `${maxVisible * step - gap}px` : 'auto',
+          overflow: useScrolling ? 'hidden' : 'visible',
           display: 'flex',
           flexDirection: 'column',
-          gap: '6px',
-          transform: `translateY(${translateY}px)`,
-          transition: 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          alignItems: 'center',
         }}
       >
-        {dots}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: `${gap}px`,
+            transform: `translateY(${translateY}px)`,
+            transition: 'transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+          }}
+        >
+          {dots}
+        </div>
       </div>
+      {showTapHint && (
+        <span className="tap-hint">
+          tap to next
+        </span>
+      )}
     </div>
   );
 }
@@ -450,6 +468,13 @@ export default function App() {
     }
   }
 
+  const [tappedCards, setTappedCards] = useState({
+    projects: false,
+    animations: false,
+    graphics: false,
+    photos: false,
+  })
+
   /* ── Cycle indices ── */
   const [projectIdx, setProjectIdx] = useState(0)
   const [animationIdx, setAnimationIdx] = useState(0)
@@ -634,10 +659,22 @@ export default function App() {
   const handleLeave = () => setHoveredCard(null)
 
   /* ── Click‑to‑cycle ── */
-  const handleProjectClick = () => setProjectIdx((i) => (i + 1) % PROJECTS_IMAGES.length)
-  const handleAnimationClick = () => setAnimationIdx((i) => (i + 1) % ANIMATIONS_VIDEOS.length)
-  const handleGraphicClick = () => setGraphicIdx((i) => (i + 1) % GRAPHICS_IMAGES.length)
-  const handlePhotoClick = () => setPhotoIdx((i) => (i + 1) % PHOTOS_IMAGES.length)
+  const handleProjectClick = () => {
+    setProjectIdx((i) => (i + 1) % PROJECTS_IMAGES.length)
+    setTappedCards((prev) => ({ ...prev, projects: true }))
+  }
+  const handleAnimationClick = () => {
+    setAnimationIdx((i) => (i + 1) % ANIMATIONS_VIDEOS.length)
+    setTappedCards((prev) => ({ ...prev, animations: true }))
+  }
+  const handleGraphicClick = () => {
+    setGraphicIdx((i) => (i + 1) % GRAPHICS_IMAGES.length)
+    setTappedCards((prev) => ({ ...prev, graphics: true }))
+  }
+  const handlePhotoClick = () => {
+    setPhotoIdx((i) => (i + 1) % PHOTOS_IMAGES.length)
+    setTappedCards((prev) => ({ ...prev, photos: true }))
+  }
 
   /* ── Current companion text (shown on the paired card) ── */
   const companionText = () => {
@@ -711,7 +748,7 @@ export default function App() {
         alt={PROJECTS_IMAGES[projectIdx].title}
       />
       <div className="card-label card-label--tl">Projects</div>
-      <CardDots total={PROJECTS_IMAGES.length} current={projectIdx} positionClass="card-dots--tl" isDark={PROJECTS_IMAGES[projectIdx].dark} />
+      <CardDots total={PROJECTS_IMAGES.length} current={projectIdx} positionClass="card-dots--tl" isDark={PROJECTS_IMAGES[projectIdx].dark} isMobile={isMobile} showTapHint={isMobile && !tappedCards.projects} tapHintAlign="left" />
       <a
         href={PROJECTS_IMAGES[projectIdx].link || '#'}
         target={PROJECTS_IMAGES[projectIdx].link ? '_blank' : undefined}
@@ -746,7 +783,7 @@ export default function App() {
 
   const animationsCard = (style) => (
     <div
-      className="frame-card frame-anchor-tl"
+      className="frame-card frame-anchor-tl animations-card"
       style={style}
       onMouseEnter={() => handleEnter('animations')}
       onMouseLeave={handleLeave}
@@ -769,7 +806,7 @@ export default function App() {
         )}
       </div>
       <div className="card-label card-label--tl">Animations</div>
-      <CardDots total={ANIMATIONS_VIDEOS.length} current={animationIdx} positionClass="card-dots--tl" isDark={ANIMATIONS_VIDEOS[animationIdx].dark} />
+      <CardDots total={ANIMATIONS_VIDEOS.length} current={animationIdx} positionClass="card-dots--tl" isDark={ANIMATIONS_VIDEOS[animationIdx].dark} isMobile={isMobile} showTapHint={isMobile && !tappedCards.animations} tapHintAlign="right" />
     </div>
   )
 
@@ -804,7 +841,7 @@ export default function App() {
 
   const graphicsCard = (style) => (
     <div
-      className="frame-card frame-anchor-tl"
+      className="frame-card frame-anchor-tl graphics-card"
       style={style}
       onMouseEnter={() => handleEnter('graphics')}
       onMouseLeave={handleLeave}
@@ -815,7 +852,7 @@ export default function App() {
         alt={GRAPHICS_IMAGES[graphicIdx].title}
       />
       <div className="card-label card-label--bl">Graphics</div>
-      <CardDots total={GRAPHICS_IMAGES.length} current={graphicIdx} positionClass="card-dots--bl" isDark={GRAPHICS_IMAGES[graphicIdx].dark} />
+      <CardDots total={GRAPHICS_IMAGES.length} current={graphicIdx} positionClass="card-dots--bl" isDark={GRAPHICS_IMAGES[graphicIdx].dark} isMobile={isMobile} showTapHint={isMobile && !tappedCards.graphics} tapHintAlign="left" />
     </div>
   )
 
@@ -841,7 +878,7 @@ export default function App() {
         )}
       </div>
       <div className="card-label card-label--tr">Photos</div>
-      <CardDots total={PHOTOS_IMAGES.length} current={photoIdx} positionClass="card-dots--tr" isDark={PHOTOS_IMAGES[photoIdx].dark} />
+      <CardDots total={PHOTOS_IMAGES.length} current={photoIdx} positionClass="card-dots--tr" isDark={PHOTOS_IMAGES[photoIdx].dark} isMobile={isMobile} showTapHint={isMobile && !tappedCards.photos} tapHintAlign="left" />
     </div>
   )
 
@@ -854,7 +891,7 @@ export default function App() {
       onClick={() => setWordIdx((i) => (i + 1) % WORDS_ARTICLES.length)}
     >
       <div className="card-label card-label--tr">Words</div>
-      <CardDots total={WORDS_ARTICLES.length} current={wordIdx} positionClass="card-dots--tr" isDark={false} />
+      <CardDots total={WORDS_ARTICLES.length} current={wordIdx} positionClass="card-dots--tr" isDark={false} isMobile={isMobile} showTapHint={false} />
       {effectivePairedTarget === 'words' && companion ? (
         <div className="companion-text companion-text--article">
           <h3 className="companion-text__title">{companion.title}</h3>
@@ -962,7 +999,7 @@ export default function App() {
                   style={{ transition: 'stroke 0.2s' }}
                 />
               </g>
-              <circle
+              <motion.circle
                 cx="50"
                 cy="50"
                 r="46"
@@ -972,7 +1009,14 @@ export default function App() {
                 strokeDasharray="289.026"
                 strokeDashoffset={289.026 - ((getHoveredCardProgress().current + 1) / getHoveredCardProgress().total) * 289.026}
                 transform="rotate(-90 50 50)"
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 1.5,
+                  ease: "easeInOut"
+                }}
                 style={{
+                  transformOrigin: '50px 50px',
                   transition: 'stroke-dashoffset 0.25s ease',
                 }}
               />

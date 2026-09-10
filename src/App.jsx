@@ -4,6 +4,63 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useMo
 import ArchiveView from './ArchiveView'
 import IdeologyView from './IdeologyView'
 import { Analytics } from '@vercel/analytics/react'
+import BackgroundLine from './BackgroundLine'
+
+// Master switch: easily enable or disable the background doodle line
+const ENABLE_BACKGROUND_LINE = true
+
+/* ==========================================================================
+   Top-Right Dot Hover Indicator Configuration
+   Fine-tune arc radius (size), center offsets, and font sizes right here:
+   ========================================================================== */
+const HOVER_ARC_CONFIG = {
+  // ── Overall Position & Font ──
+  offsetX: 0,             // <-- Line 18: Shift entire hover text left (-) or right (+)
+  offsetY: 0,             // <-- Line 19: Shift entire hover text up (-) or down (+)
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', // <-- Clean sans-serif matching mockup
+
+  // ── Inner Arc: "Click to Download ↑" ──
+  arc1CenterX: 40,        // Line 23: Move Arc 1 center horizontally
+  arc1CenterY: 8,        // Line 24: Move Arc 1 center vertically
+  arc1Radius: 142,        // <-- Line 25: TUNE HERE: Inner arc size / distance from dot
+  arc1FontSize: 42,       // <-- Line 26: TUNE HERE: Inner text font size
+  arc1StartAngle: 215,    // Where "Click" starts (degrees)
+  arc1EndAngle: 30,       // Where arrow ends (degrees)
+  arc1StartOffset: '3%',  // Spacing offset from arc start
+
+  // ── Outer Arc: "{count} clicks" ──
+  arc2CenterX: 100,        // Line 32: Move Arc 2 center horizontally
+  arc2CenterY: 4,       // Line 33: Move Arc 2 center vertically
+  arc2Radius: 220,        // <-- Line 34: TUNE HERE: Outer arc size / distance
+  arc2FontSize: 60,       // <-- Line 35: TUNE HERE: Outer text font size
+  arc2StartAngle: 160,    // Left extent of clicks arc
+  arc2EndAngle: 32,       // Right extent of clicks arc
+}
+
+function getArcPath(cx, cy, r, startDeg, endDeg) {
+  const rad = (d) => (d * Math.PI) / 180
+  const x1 = (cx + r * Math.cos(rad(startDeg))).toFixed(2)
+  const y1 = (cy + r * Math.sin(rad(startDeg))).toFixed(2)
+  const x2 = (cx + r * Math.cos(rad(endDeg))).toFixed(2)
+  const y2 = (cy + r * Math.sin(rad(endDeg))).toFixed(2)
+  return `M ${x1} ${y1} A ${r} ${r} 0 0 0 ${x2} ${y2}`
+}
+
+const ARC1_PATH_D = getArcPath(
+  HOVER_ARC_CONFIG.arc1CenterX,
+  HOVER_ARC_CONFIG.arc1CenterY,
+  HOVER_ARC_CONFIG.arc1Radius,
+  HOVER_ARC_CONFIG.arc1StartAngle,
+  HOVER_ARC_CONFIG.arc1EndAngle
+)
+
+const ARC2_PATH_D = getArcPath(
+  HOVER_ARC_CONFIG.arc2CenterX,
+  HOVER_ARC_CONFIG.arc2CenterY,
+  HOVER_ARC_CONFIG.arc2Radius,
+  HOVER_ARC_CONFIG.arc2StartAngle,
+  HOVER_ARC_CONFIG.arc2EndAngle
+)
 
 
 /* ============================================
@@ -257,6 +314,129 @@ function CardDots({ total, current, positionClass, isDark, isMobile, showTapHint
 export default function App() {
   const canvasRef = useRef(null)
   const cursorRef = useRef(null)
+  const backgroundLineRef = useRef(null)
+  const progressRingRef = useRef(null)
+
+  const handleLineProgress = useCallback((progress) => {
+    if (progressRingRef.current) {
+      const circumference = 266.407;
+      const offset = circumference * (1 - Math.max(0, Math.min(1, progress)));
+      progressRingRef.current.style.strokeDashoffset = `${offset}`;
+    }
+  }, [])
+
+  const [isShuttering, setIsShuttering] = useState(false)
+  const [isDotHovered, setIsDotHovered] = useState(false)
+  const [cardClicks, setCardClicks] = useState(0)
+
+  const handleExportPrint = useCallback(() => {
+    if (isShuttering) return
+    setIsShuttering(true)
+
+    const lineState = backgroundLineRef.current?.getCurrentState()
+    if (!lineState) return
+
+    const {
+      d,
+      totalLength,
+      currentLength,
+      progress,
+      color,
+      alpha,
+      strokeWidth,
+      viewBoxWidth = 2250,
+      viewBoxHeight = 1593.75,
+    } = lineState
+
+    const canvasW = 1440
+    const canvasH = 1020
+    const exportScale = 2 // 2x Retina for crisp 2880 x 2040 print resolution
+    const outW = canvasW * exportScale
+    const outH = canvasH * exportScale
+
+    // Line scale factor from SVG viewBox to canvas (1440 / 2250 = 0.64)
+    const lineScale = canvasW / viewBoxWidth
+
+    // Corner dot positions in canvas coordinates
+    const dotInset = 30
+    const dotSize = 25
+    const dotR = dotSize / 2 // 12.5
+
+    const tl = { x: dotInset + dotR, y: dotInset + dotR }
+    const bl = { x: dotInset + dotR, y: canvasH - dotInset - dotR }
+    const br = { x: canvasW - dotInset - dotR, y: canvasH - dotInset - dotR }
+    const tr = { x: canvasW - dotInset - dotR, y: dotInset + dotR }
+
+    // Top-right progress dot geometry
+    const trInnerR = dotR * 0.54 // 6.75
+    const trRingR = dotR * 0.848 // 10.6
+    const trRingStroke = dotR * 0.304 // 3.8
+    const trCircumference = 2 * Math.PI * trRingR
+    const trOffset = trCircumference * (1 - Math.max(0, Math.min(1, progress)))
+
+    const dashArray = `${totalLength} ${totalLength}`
+    const dashOffset = Math.max(0, totalLength - currentLength)
+
+    const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${canvasW} ${canvasH}" width="${outW}" height="${outH}">
+      <rect width="${canvasW}" height="${canvasH}" fill="#FFFFFF"/>
+      <g transform="scale(${lineScale})">
+        <path
+          d="${d}"
+          fill="none"
+          stroke="#27AA20"
+          stroke-width="${strokeWidth}"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-dasharray="${dashArray}"
+          stroke-dashoffset="${dashOffset}"
+        />
+      </g>
+      <!-- Corner dots -->
+      <circle cx="${tl.x}" cy="${tl.y}" r="${dotR}" fill="#27AA20"/>
+      <circle cx="${bl.x}" cy="${bl.y}" r="${dotR}" fill="#27AA20"/>
+      <circle cx="${br.x}" cy="${br.y}" r="${dotR}" fill="#27AA20"/>
+      <!-- Top-right progress dot -->
+      <circle cx="${tr.x}" cy="${tr.y}" r="${trInnerR}" fill="#27AA20"/>
+      <circle
+        cx="${tr.x}"
+        cy="${tr.y}"
+        r="${trRingR}"
+        fill="none"
+        stroke="#27AA20"
+        stroke-width="${trRingStroke}"
+        stroke-linecap="butt"
+        stroke-dasharray="${trCircumference} ${trCircumference}"
+        stroke-dashoffset="${trOffset}"
+        transform="rotate(-90 ${tr.x} ${tr.y})"
+      />
+    </svg>`
+
+    const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const img = new Image()
+    img.onload = () => {
+      const offscreenCanvas = document.createElement('canvas')
+      offscreenCanvas.width = outW
+      offscreenCanvas.height = outH
+      const ctx = offscreenCanvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, outW, outH)
+      URL.revokeObjectURL(url)
+
+      offscreenCanvas.toBlob((pngBlob) => {
+        if (!pngBlob) return
+        const downloadUrl = URL.createObjectURL(pngBlob)
+        const a = document.createElement('a')
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+        a.download = `persweb-print-${timestamp}.png`
+        a.href = downloadUrl
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        setTimeout(() => URL.revokeObjectURL(downloadUrl), 2000)
+      }, 'image/png')
+    }
+    img.src = url
+  }, [isShuttering])
 
   const getInitialView = () => {
     if (typeof window !== 'undefined') {
@@ -266,6 +446,13 @@ export default function App() {
     return 'home';
   };
   const [view, setView] = useState(getInitialView());
+
+  // Trigger burst when returning to home view
+  useEffect(() => {
+    if (view === 'home') {
+      backgroundLineRef.current?.triggerBurst();
+    }
+  }, [view]);
 
   // --- Image Preloading Logic ---
   useEffect(() => {
@@ -662,18 +849,26 @@ export default function App() {
   const handleProjectClick = () => {
     setProjectIdx((i) => (i + 1) % PROJECTS_IMAGES.length)
     setTappedCards((prev) => ({ ...prev, projects: true }))
+    setCardClicks((c) => c + 1)
+    backgroundLineRef.current?.triggerBurst()
   }
   const handleAnimationClick = () => {
     setAnimationIdx((i) => (i + 1) % ANIMATIONS_VIDEOS.length)
     setTappedCards((prev) => ({ ...prev, animations: true }))
+    setCardClicks((c) => c + 1)
+    backgroundLineRef.current?.triggerBurst()
   }
   const handleGraphicClick = () => {
     setGraphicIdx((i) => (i + 1) % GRAPHICS_IMAGES.length)
     setTappedCards((prev) => ({ ...prev, graphics: true }))
+    setCardClicks((c) => c + 1)
+    backgroundLineRef.current?.triggerBurst()
   }
   const handlePhotoClick = () => {
     setPhotoIdx((i) => (i + 1) % PHOTOS_IMAGES.length)
     setTappedCards((prev) => ({ ...prev, photos: true }))
+    setCardClicks((c) => c + 1)
+    backgroundLineRef.current?.triggerBurst()
   }
 
   /* ── Current companion text (shown on the paired card) ── */
@@ -888,7 +1083,11 @@ export default function App() {
       style={style}
       onMouseEnter={() => handleEnter('words')}
       onMouseLeave={handleLeave}
-      onClick={() => setWordIdx((i) => (i + 1) % WORDS_ARTICLES.length)}
+      onClick={() => {
+        setWordIdx((i) => (i + 1) % WORDS_ARTICLES.length)
+        setCardClicks((c) => c + 1)
+        backgroundLineRef.current?.triggerBurst()
+      }}
     >
       <div className="card-label card-label--tr">Words</div>
       <CardDots total={WORDS_ARTICLES.length} current={wordIdx} positionClass="card-dots--tr" isDark={false} isMobile={isMobile} showTapHint={false} />
@@ -1053,6 +1252,37 @@ export default function App() {
             position: 'relative',
           }}
         >
+          {/* ── Background Doodle Line ── */}
+          {ENABLE_BACKGROUND_LINE && (
+            <motion.div
+              className="canvas-background-line-wrapper"
+              initial={false}
+              animate={{
+                opacity: view === 'home' ? 1 : 0,
+                scale: view === 'home' ? 1 : (isMobile ? 1 : layout.archiveTransition.scaleExit),
+              }}
+              transition={{
+                duration: layout.archiveTransition.duration,
+                ease: 'easeInOut',
+              }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+                zIndex: 0,
+              }}
+            >
+              <BackgroundLine
+                ref={backgroundLineRef}
+                isPaused={view !== 'home'}
+                onProgress={handleLineProgress}
+              />
+            </motion.div>
+          )}
+
           {/* ──────────────────────────────────────────────
              Page Transitions
              ────────────────────────────────────────────── */}
@@ -1344,14 +1574,115 @@ export default function App() {
             left: mobileControls.dotInset, top: mobileControls.dotInset,
           } : { cursor: 'pointer', zIndex: 1101 }}
         />
-        <div className="corner-dot corner-dot--tr"
+        <div
+          className={`corner-dot corner-dot--tr ${ENABLE_BACKGROUND_LINE ? 'has-progress-ring' : ''}`}
+          role="button"
+          tabIndex={0}
+          aria-label="Export line drawing print"
+          onClick={handleExportPrint}
+          onMouseEnter={() => setIsDotHovered(true)}
+          onMouseLeave={() => setIsDotHovered(false)}
+          onFocus={() => setIsDotHovered(true)}
+          onBlur={() => setIsDotHovered(false)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleExportPrint();
+            }
+          }}
           style={isMobile ? {
             position: 'fixed',
             width: mobileControls.dotSize, height: mobileControls.dotSize,
             right: mobileControls.dotInset, top: mobileControls.dotInset,
             left: 'auto',
-          } : undefined}
-        />
+            cursor: 'pointer',
+            zIndex: 1101,
+          } : {
+            cursor: 'pointer',
+            zIndex: 1101,
+          }}
+        >
+          {ENABLE_BACKGROUND_LINE && (
+            <svg
+              viewBox="0 0 100 100"
+              style={{ width: '100%', height: '100%', display: 'block', overflow: 'visible' }}
+              aria-hidden="true"
+            >
+              {/* Concentric circular hover indicator text */}
+              <AnimatePresence>
+                {isDotHovered && (
+                  <motion.g
+                    initial={{ opacity: 0, scale: 0.94 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                    style={{ transformOrigin: '50px 50px', pointerEvents: 'none' }}
+                  >
+                    <g transform={`translate(${HOVER_ARC_CONFIG.offsetX || 0}, ${HOVER_ARC_CONFIG.offsetY || 0})`}>
+                      <defs>
+                        <path
+                          id="tr-download-path"
+                          d={ARC1_PATH_D}
+                          fill="none"
+                        />
+                        <path
+                          id="tr-clicks-path"
+                          d={ARC2_PATH_D}
+                          fill="none"
+                        />
+                      </defs>
+                      <text
+                        fontFamily={HOVER_ARC_CONFIG.fontFamily}
+                        fontSize={HOVER_ARC_CONFIG.arc1FontSize}
+                        fontWeight="500"
+                        fill="#1E1E1E"
+                        letterSpacing="0.2"
+                      >
+                        <textPath href="#tr-download-path" startOffset={HOVER_ARC_CONFIG.arc1StartOffset}>
+                          Click to Download ↑
+                        </textPath>
+                      </text>
+                      <text
+                        fontFamily={HOVER_ARC_CONFIG.fontFamily}
+                        fontSize={HOVER_ARC_CONFIG.arc2FontSize}
+                        fontWeight="600"
+                        fill="#1E1E1E"
+                        letterSpacing="0.3"
+                      >
+                        <textPath href="#tr-clicks-path" startOffset="50%" textAnchor="middle">
+                          {`${cardClicks} ${cardClicks === 1 ? 'click' : 'clicks'}`}
+                        </textPath>
+                      </text>
+                    </g>
+                  </motion.g>
+                )}
+              </AnimatePresence>
+              {/* Inner static dot */}
+              <circle cx="50" cy="50" r="27" fill="#27AA20" />
+              {/* Outer progress ring with camera-shutter contraction animation */}
+              <motion.g
+                animate={isShuttering ? { scale: [1, 0.78, 1] } : { scale: 1 }}
+                transition={{ duration: 0.22, times: [0, 0.35, 1], ease: ['easeIn', 'easeOut'] }}
+                style={{ transformOrigin: '50px 50px' }}
+                onAnimationComplete={() => setIsShuttering(false)}
+              >
+                <circle
+                  ref={progressRingRef}
+                  cx="50"
+                  cy="50"
+                  r="42.4"
+                  fill="none"
+                  stroke="#27AA20"
+                  strokeWidth="15.2"
+                  strokeLinecap="butt"
+                  strokeDasharray="266.407 266.407"
+                  strokeDashoffset="266.407"
+                  transform="rotate(-90 50 50)"
+                />
+              </motion.g>
+            </svg>
+          )}
+        </div>
         <div className="corner-dot corner-dot--bl"
           style={isMobile ? {
             position: 'fixed',
@@ -1410,6 +1741,7 @@ export default function App() {
             e.stopPropagation();
             if (cardState === 'thrown') {
               setIsCardFlipped(!isCardFlipped);
+              setCardClicks((c) => c + 1);
             }
           }}
         >

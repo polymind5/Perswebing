@@ -5,9 +5,11 @@ import ArchiveView from './ArchiveView'
 import IdeologyView from './IdeologyView'
 import { Analytics } from '@vercel/analytics/react'
 import BackgroundLine from './BackgroundLine'
+import CanvasStamp, { getStampSvgString } from './CanvasStamp'
 
-// Master switch: easily enable or disable the background doodle line
+// Master switches: easily enable or disable canvas features
 const ENABLE_BACKGROUND_LINE = true
+const ENABLE_STAMP = true
 
 /* ==========================================================================
    Top-Right Dot Hover Indicator Configuration
@@ -409,6 +411,8 @@ export default function App() {
         stroke-dashoffset="${trOffset}"
         transform="rotate(-90 ${tr.x} ${tr.y})"
       />
+      <!-- Dynamic Vector Stamp -->
+      ${ENABLE_STAMP ? getStampSvgString({ clicks: cardClicks }) : ''}
     </svg>`
 
     const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
@@ -436,7 +440,8 @@ export default function App() {
       }, 'image/png')
     }
     img.src = url
-  }, [isShuttering])
+  }, [isShuttering, cardClicks])
+
 
   const getInitialView = () => {
     if (typeof window !== 'undefined') {
@@ -1282,6 +1287,37 @@ export default function App() {
               />
             </motion.div>
           )}
+
+          {/* ── Dynamic Vector Stamp ── */}
+          {ENABLE_STAMP && !isMobile && (
+            <motion.svg
+              className="canvas-stamp-wrapper"
+              viewBox={`0 0 ${layout.canvasW} ${layout.canvasH}`}
+              initial={false}
+              animate={{
+                opacity: view === 'home' ? 1 : 0,
+                scale: view === 'home' ? 1 : layout.archiveTransition.scaleExit,
+              }}
+              transition={{
+                duration: layout.archiveTransition.duration,
+                ease: 'easeInOut',
+              }}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+                zIndex: 0,
+                overflow: 'visible',
+              }}
+              aria-hidden="true"
+            >
+              <CanvasStamp clicks={cardClicks} />
+            </motion.svg>
+          )}
+
 
           {/* ──────────────────────────────────────────────
              Page Transitions

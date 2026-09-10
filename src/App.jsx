@@ -9,7 +9,7 @@ import CanvasStamp, { getStampSvgString } from './CanvasStamp'
 
 // Master switches: easily enable or disable canvas features
 const ENABLE_BACKGROUND_LINE = true
-const ENABLE_STAMP = true
+const ENABLE_STAMP = false
 
 /* ==========================================================================
    Top-Right Dot Hover Indicator Configuration

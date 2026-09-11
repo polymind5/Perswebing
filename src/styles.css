@@ -54,6 +54,16 @@ body {
   overflow: visible;
 }
 
+.canvas-background-line-wrapper.is-mobile {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+  z-index: 0;
+}
+
 .canvas-background-line {
   position: absolute;
   top: 0;
@@ -64,6 +74,12 @@ body {
   z-index: 0;
   overflow: visible;
 }
+
+.canvas-background-line.is-mobile {
+  width: 100% !important;
+  height: 100% !important;
+}
+
 
 /* ============================================
    Image/Video Frames — Anchor-Point System

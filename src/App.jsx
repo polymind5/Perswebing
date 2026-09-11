@@ -350,14 +350,18 @@ export default function App() {
       viewBoxHeight = 1593.75,
     } = lineState
 
-    const canvasW = 1440
-    const canvasH = 1020
-    const exportScale = 2 // 2x Retina for crisp 2880 x 2040 print resolution
+    // Option A: Mobile Portrait Print (1020 x 1440, 2x Retina: 2040 x 2880)
+    // Desktop Landscape Print (1440 x 1020, 2x Retina: 2880 x 2040)
+    const canvasW = isMobile ? 1020 : 1440
+    const canvasH = isMobile ? 1440 : 1020
+    const exportScale = 2
     const outW = canvasW * exportScale
     const outH = canvasH * exportScale
 
-    // Line scale factor from SVG viewBox to canvas (1440 / 2250 = 0.64)
-    const lineScale = canvasW / viewBoxWidth
+    // Line scale factor from SVG viewBox to canvas:
+    // Desktop: 1440 / 2250 = 0.64
+    // Mobile:  1020 / 1593.75 = 0.64
+    const lineScale = 0.64
 
     // Corner dot positions in canvas coordinates
     const dotInset = 30
@@ -379,9 +383,13 @@ export default function App() {
     const dashArray = `${totalLength} ${totalLength}`
     const dashOffset = Math.max(0, totalLength - currentLength)
 
+    const lineTransform = isMobile
+      ? `scale(${lineScale}) translate(1593.75, 0) rotate(90)`
+      : `scale(${lineScale})`
+
     const svgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${canvasW} ${canvasH}" width="${outW}" height="${outH}">
       <rect width="${canvasW}" height="${canvasH}" fill="#FFFFFF"/>
-      <g transform="scale(${lineScale})">
+      <g transform="${lineTransform}">
         <path
           d="${d}"
           fill="none"
@@ -431,7 +439,8 @@ export default function App() {
         const downloadUrl = URL.createObjectURL(pngBlob)
         const a = document.createElement('a')
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
-        a.download = `persweb-print-${timestamp}.png`
+        const filenamePrefix = isMobile ? 'persweb-print-mobile' : 'persweb-print'
+        a.download = `${filenamePrefix}-${timestamp}.png`
         a.href = downloadUrl
         document.body.appendChild(a)
         a.click()
@@ -440,7 +449,8 @@ export default function App() {
       }, 'image/png')
     }
     img.src = url
-  }, [isShuttering, cardClicks])
+  }, [isShuttering, cardClicks, isMobile])
+
 
 
   const getInitialView = () => {
@@ -1260,7 +1270,7 @@ export default function App() {
           {/* ── Background Doodle Line ── */}
           {ENABLE_BACKGROUND_LINE && (
             <motion.div
-              className="canvas-background-line-wrapper"
+              className={`canvas-background-line-wrapper ${isMobile ? 'is-mobile' : ''}`}
               initial={false}
               animate={{
                 opacity: view === 'home' ? 1 : 0,
@@ -1270,7 +1280,16 @@ export default function App() {
                 duration: layout.archiveTransition.duration,
                 ease: 'easeInOut',
               }}
-              style={{
+              style={isMobile ? {
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                pointerEvents: 'none',
+                zIndex: 0,
+                overflow: 'hidden',
+              } : {
                 position: 'absolute',
                 top: 0,
                 left: 0,
@@ -1283,10 +1302,12 @@ export default function App() {
               <BackgroundLine
                 ref={backgroundLineRef}
                 isPaused={view !== 'home'}
+                isMobile={isMobile}
                 onProgress={handleLineProgress}
               />
             </motion.div>
           )}
+
 
           {/* ── Dynamic Vector Stamp ── */}
           {ENABLE_STAMP && !isMobile && (

@@ -5,8 +5,8 @@ import ArchiveView from './ArchiveView'
 import IdeologyView from './IdeologyView'
 import { Analytics } from '@vercel/analytics/react'
 import BackgroundLine from './BackgroundLine'
-import CanvasStamp, { STAMP_CONFIG, getStampSvgString } from './CanvasStamp'
-import StampTuner, { loadSavedStampConfig } from './StampTuner'
+import CanvasStamp, { STAMP_CONFIG, getStampSvgString, loadSavedStampConfig } from './CanvasStamp'
+import StampTuner from './StampTuner'
 
 // Master switches: easily enable or disable canvas features
 const ENABLE_BACKGROUND_LINE = true
@@ -1317,7 +1317,7 @@ export default function App() {
 
 
           {/* ── Dynamic Vector Stamp ── */}
-          {ENABLE_STAMP && !isMobile && (
+          {ENABLE_STAMP && (stampConfig.showOnCanvas !== false) && !isMobile && (
             <motion.svg
               className="canvas-stamp-wrapper"
               viewBox={`0 0 ${layout.canvasW} ${layout.canvasH}`}

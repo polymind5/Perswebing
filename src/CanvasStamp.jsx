@@ -35,8 +35,8 @@ export const STAMP_CONFIG = {
   dotDistance: 241.5,      // Distance from center along major axis
 
   // Typography & Arcs
-  textRadiusX: 194.5,      // Text baseline ellipse semi-major axis
-  textRadiusY: 118,        // Text baseline ellipse semi-minor axis
+  textRadiusX: 241.5,      // Text centerline semi-major axis (centered in channel)
+  textRadiusY: 146,        // Text centerline semi-minor axis (centered in channel)
   clicksFontSize: 30,      // Font size for "{clicks} CLICKS"
   clicksLetterSpacing: 1.2,// Letter spacing for clicks
   dateFontSize: 28,        // Font size for timestamp
@@ -48,6 +48,28 @@ export const STAMP_CONFIG = {
   blackColor: '#1E1E1E',   // Ring stroke color
   greenColor: '#27AA20',   // Text and dot green color
 };
+
+export const STAMP_STORAGE_KEY = 'persweb_stamp_tuning_config_v2';
+
+export function loadSavedStampConfig() {
+  if (typeof window === 'undefined') return { ...STAMP_CONFIG };
+  try {
+    const raw = localStorage.getItem(STAMP_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      const merged = { ...STAMP_CONFIG, ...parsed };
+      // Self-heal: ensure text radius is centered in channel (not inside inner ellipse 194.5)
+      if (!merged.textRadiusX || merged.textRadiusX < 210) {
+        merged.textRadiusX = 241.5;
+        merged.textRadiusY = 146;
+      }
+      return merged;
+    }
+  } catch (e) {
+    console.warn('Failed to load saved stamp config:', e);
+  }
+  return { ...STAMP_CONFIG };
+}
 
 export function formatStampDate(date = new Date()) {
   const d = date instanceof Date ? date : new Date(date);
@@ -140,8 +162,9 @@ export default function CanvasStamp({
         fontWeight={cfg.fontWeight}
         fill={cfg.greenColor}
         letterSpacing={cfg.clicksLetterSpacing}
+        dominantBaseline="central"
       >
-        <textPath href={`#${lowerPathId}`} startOffset="50%" textAnchor="middle" side="right">
+        <textPath href={`#${lowerPathId}`} startOffset="50%" textAnchor="middle">
           {clicksText}
         </textPath>
       </text>
@@ -153,8 +176,9 @@ export default function CanvasStamp({
         fontWeight={cfg.fontWeight}
         fill={cfg.greenColor}
         letterSpacing={cfg.dateLetterSpacing}
+        dominantBaseline="central"
       >
-        <textPath href={`#${upperPathId}`} startOffset="50%" textAnchor="middle" side="right">
+        <textPath href={`#${upperPathId}`} startOffset="50%" textAnchor="middle">
           {formattedDate}
         </textPath>
       </text>
@@ -179,11 +203,11 @@ export function getStampSvgString({ clicks = 0, timestamp, customConfig = {} } =
       <ellipse cx="0" cy="0" rx="${cfg.rxInner}" ry="${cfg.ryInner}" fill="none" stroke="${cfg.blackColor}" stroke-width="${cfg.innerStroke}" />
       <circle cx="${cfg.dotDistance}" cy="0" r="${cfg.dotRadius}" fill="${cfg.greenColor}" />
       <circle cx="${-cfg.dotDistance}" cy="0" r="${cfg.dotRadius}" fill="${cfg.greenColor}" />
-      <text font-family="${cfg.fontFamily}" font-size="${cfg.clicksFontSize}" font-weight="${cfg.fontWeight}" fill="${cfg.greenColor}" letter-spacing="${cfg.clicksLetterSpacing}">
-        <textPath href="#export-stamp-lower" startOffset="50%" text-anchor="middle" side="right">${clicksText}</textPath>
+      <text font-family="${cfg.fontFamily}" font-size="${cfg.clicksFontSize}" font-weight="${cfg.fontWeight}" fill="${cfg.greenColor}" letter-spacing="${cfg.clicksLetterSpacing}" dominant-baseline="central">
+        <textPath href="#export-stamp-lower" startOffset="50%" text-anchor="middle">${clicksText}</textPath>
       </text>
-      <text font-family="${cfg.fontFamily}" font-size="${cfg.dateFontSize}" font-weight="${cfg.fontWeight}" fill="${cfg.greenColor}" letter-spacing="${cfg.dateLetterSpacing}">
-        <textPath href="#export-stamp-upper" startOffset="50%" text-anchor="middle" side="right">${formattedDate}</textPath>
+      <text font-family="${cfg.fontFamily}" font-size="${cfg.dateFontSize}" font-weight="${cfg.fontWeight}" fill="${cfg.greenColor}" letter-spacing="${cfg.dateLetterSpacing}" dominant-baseline="central">
+        <textPath href="#export-stamp-upper" startOffset="50%" text-anchor="middle">${formattedDate}</textPath>
       </text>
     </g>
   `;

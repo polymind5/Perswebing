@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { STAMP_CONFIG } from './CanvasStamp';
-
-const STORAGE_KEY = 'persweb_stamp_tuning_config_v1';
+import { STAMP_CONFIG, STAMP_STORAGE_KEY as STORAGE_KEY } from './CanvasStamp';
 
 const PRESETS = {
   defaultMichroma: {
     name: 'Default (Michroma)',
     config: {
       ...STAMP_CONFIG,
+      textRadiusX: 241.5,
+      textRadiusY: 146,
       fontFamily: '"Michroma", sans-serif',
       clicksFontSize: 30,
       clicksLetterSpacing: 1.2,
@@ -28,6 +28,8 @@ const PRESETS = {
       ryOuter: 177,
       rxInner: 194.5,
       ryInner: 118,
+      textRadiusX: 241.5,
+      textRadiusY: 146,
       outerStroke: 20,
       innerStroke: 6.5,
       dotDistance: 241.5,
@@ -43,6 +45,8 @@ const PRESETS = {
     config: {
       ...STAMP_CONFIG,
       scale: 0.40,
+      textRadiusX: 241.5,
+      textRadiusY: 146,
       outerStroke: 14,
       innerStroke: 5,
       clicksFontSize: 26,
@@ -55,6 +59,8 @@ const PRESETS = {
     config: {
       ...STAMP_CONFIG,
       scale: 0.52,
+      textRadiusX: 241.5,
+      textRadiusY: 146,
       outerStroke: 26,
       innerStroke: 8,
       clicksFontSize: 34,
@@ -63,19 +69,6 @@ const PRESETS = {
     },
   },
 };
-
-export function loadSavedStampConfig() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return { ...STAMP_CONFIG, ...parsed };
-    }
-  } catch (e) {
-    console.warn('Failed to load saved stamp config:', e);
-  }
-  return { ...STAMP_CONFIG };
-}
 
 export default function StampTuner({
   config,
@@ -351,6 +344,19 @@ export default function StampTuner({
                     checked={config.liveClock}
                     onChange={(e) => updateParam('liveClock', e.target.checked)}
                   />
+                </div>
+
+                <div className="tuner-row tuner-toggle-row" style={{ marginTop: 6, paddingTop: 6, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                  <label className="tuner-label" style={{ color: '#E4E4E7' }}>Show on Main Canvas</label>
+                  <input
+                    type="checkbox"
+                    className="tuner-checkbox"
+                    checked={config.showOnCanvas !== false}
+                    onChange={(e) => updateParam('showOnCanvas', e.target.checked)}
+                  />
+                </div>
+                <div style={{ fontSize: '9.5px', color: '#71717A', marginTop: 2 }}>
+                  * Stamp is ALWAYS visible on print export regardless of this toggle.
                 </div>
               </div>
             )}

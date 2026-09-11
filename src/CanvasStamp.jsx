@@ -37,12 +37,12 @@ export const STAMP_CONFIG = {
   // Typography & Arcs
   textRadiusX: 194.5,      // Text baseline ellipse semi-major axis
   textRadiusY: 118,        // Text baseline ellipse semi-minor axis
-  clicksFontSize: 38,      // Font size for "{clicks} CLICKS"
-  clicksLetterSpacing: 1.5,// Letter spacing for clicks
-  dateFontSize: 35,        // Font size for timestamp
-  dateLetterSpacing: 1.2,  // Letter spacing for timestamp
-  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
-  fontWeight: '600',
+  clicksFontSize: 30,      // Font size for "{clicks} CLICKS"
+  clicksLetterSpacing: 1.2,// Letter spacing for clicks
+  dateFontSize: 28,        // Font size for timestamp
+  dateLetterSpacing: 1.0,  // Letter spacing for timestamp
+  fontFamily: '"Michroma", sans-serif',
+  fontWeight: '400',
 
   // Colors
   blackColor: '#1E1E1E',   // Ring stroke color

@@ -5,11 +5,12 @@ import ArchiveView from './ArchiveView'
 import IdeologyView from './IdeologyView'
 import { Analytics } from '@vercel/analytics/react'
 import BackgroundLine from './BackgroundLine'
-import CanvasStamp, { getStampSvgString } from './CanvasStamp'
+import CanvasStamp, { STAMP_CONFIG, getStampSvgString } from './CanvasStamp'
+import StampTuner, { loadSavedStampConfig } from './StampTuner'
 
 // Master switches: easily enable or disable canvas features
 const ENABLE_BACKGROUND_LINE = true
-const ENABLE_STAMP = false
+const ENABLE_STAMP = true
 
 /* ==========================================================================
    Top-Right Dot Hover Indicator Configuration
@@ -344,6 +345,8 @@ export default function App() {
   const [isShuttering, setIsShuttering] = useState(false)
   const [isDotHovered, setIsDotHovered] = useState(false)
   const [cardClicks, setCardClicks] = useState(0)
+  const [stampConfig, setStampConfig] = useState(() => loadSavedStampConfig())
+  const [showStampTuner, setShowStampTuner] = useState(true)
 
   const handleExportPrint = useCallback(() => {
     if (isShuttering) return
@@ -434,7 +437,7 @@ export default function App() {
         transform="rotate(-90 ${tr.x} ${tr.y})"
       />
       <!-- Dynamic Vector Stamp -->
-      ${ENABLE_STAMP ? getStampSvgString({ clicks: cardClicks }) : ''}
+      ${ENABLE_STAMP ? getStampSvgString({ clicks: cardClicks, customConfig: stampConfig }) : ''}
     </svg>`
 
     const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
@@ -463,7 +466,7 @@ export default function App() {
       }, 'image/png')
     }
     img.src = url
-  }, [isShuttering, cardClicks, isMobile])
+  }, [isShuttering, cardClicks, isMobile, stampConfig])
 
 
 
@@ -1339,7 +1342,7 @@ export default function App() {
               }}
               aria-hidden="true"
             >
-              <CanvasStamp clicks={cardClicks} />
+              <CanvasStamp clicks={cardClicks} customConfig={stampConfig} />
             </motion.svg>
           )}
 
@@ -1845,6 +1848,18 @@ export default function App() {
         />,
         document.body
       )}
+
+      {/* Stamp Live Tuning Panel (DialKit-style visual parameter dialer) */}
+      {ENABLE_STAMP && (
+        <StampTuner
+          config={stampConfig}
+          onChange={setStampConfig}
+          onReset={() => setStampConfig({ ...STAMP_CONFIG })}
+          isVisible={showStampTuner}
+          onToggleVisible={() => setShowStampTuner((v) => !v)}
+        />
+      )}
+
       {/* Agentation removed for production */}
       <Analytics />
     </>

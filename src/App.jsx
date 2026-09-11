@@ -314,6 +314,20 @@ function CardDots({ total, current, positionClass, isDark, isMobile, showTapHint
 }
 
 export default function App() {
+  const [windowSize, setWindowSize] = useState(() => ({
+    w: typeof window !== 'undefined' ? window.innerWidth : 1440,
+    h: typeof window !== 'undefined' ? window.innerHeight : 1020,
+  }));
+
+  useEffect(() => {
+    const handleResize = () => setWindowSize({ w: window.innerWidth, h: window.innerHeight });
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowSize.w < 768;
+
   const canvasRef = useRef(null)
   const cursorRef = useRef(null)
   const backgroundLineRef = useRef(null)
@@ -692,18 +706,8 @@ export default function App() {
   /* ──────────────────────────────────────────────
      DialKit controls
      ────────────────────────────────────────────── */
-  const [windowSize, setWindowSize] = useState({ w: 1440, h: 1020 });
-
-  useEffect(() => {
-    const handleResize = () => setWindowSize({ w: window.innerWidth, h: window.innerHeight });
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  const isMobile = windowSize.w < 768;
-
   const layoutControls = DIALKIT_LAYOUT_DEFAULTS;
+
   const mobileControls = MOBILE_LAYOUT_DEFAULTS;
 
   const CARDS_LAYOUT = {

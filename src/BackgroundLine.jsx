@@ -25,7 +25,7 @@ const BACKGROUND_LINE_CONFIG = {
   loopOnComplete: false,   // When complete, the line stays visible
 
   // ─── Mobile Specific Tuning (Tweak freely) ───
-  mobileScale: 1.15,       // <-- Line 27: Scale up on mobile to almost cover the screen (1.1 - 1.35)
+  mobileScale: 1.05,       // <-- Line 27: Scale up on mobile to almost cover the screen (1.1 - 1.35)
   mobileOffsetX: 0,        // <-- Line 28: Horizontal shift on phone
   mobileOffsetY: 0,        // <-- Line 29: Vertical shift on phone
 };
@@ -53,8 +53,8 @@ const BackgroundLine = forwardRef(function BackgroundLine(
 ) {
 
   const pathRef = useRef(null);
-  const triggerBurstRef = useRef(() => {});
-  const resetRef = useRef(() => {});
+  const triggerBurstRef = useRef(() => { });
+  const resetRef = useRef(() => { });
   const getCurrentStateRef = useRef(() => ({}));
   const isPausedRef = useRef(isPaused);
   const onProgressRef = useRef(onProgress);

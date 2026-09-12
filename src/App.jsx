@@ -10,7 +10,8 @@ import StampTuner from './StampTuner'
 
 // Master switches: easily enable or disable canvas features
 const ENABLE_BACKGROUND_LINE = true
-const ENABLE_STAMP = true
+const ENABLE_STAMP_ON_SITE = false // Kept only on export per user request
+const ENABLE_STAMP_ON_EXPORT = true
 
 /* ==========================================================================
    Top-Right Dot Hover Indicator Configuration
@@ -440,7 +441,7 @@ export default function App() {
         transform="rotate(-90 ${tr.x} ${tr.y})"
       />
       <!-- Dynamic Vector Stamp -->
-      ${ENABLE_STAMP ? getStampSvgString({ clicks: cardClicks, customConfig: stampConfig }) : ''}
+      ${ENABLE_STAMP_ON_EXPORT ? getStampSvgString({ clicks: cardClicks, customConfig: stampConfig }) : ''}
     </svg>`
 
     const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
@@ -1347,7 +1348,7 @@ export default function App() {
 
 
           {/* ── Dynamic Vector Stamp ── */}
-          {ENABLE_STAMP && (stampConfig.showOnCanvas !== false) && !isMobile && (
+          {ENABLE_STAMP_ON_SITE && (stampConfig.showOnCanvas !== false) && !isMobile && (
             <motion.svg
               className="canvas-stamp-wrapper"
               viewBox={`0 0 ${layout.canvasW} ${layout.canvasH}`}
@@ -1880,7 +1881,7 @@ export default function App() {
       )}
 
       {/* Stamp Live Tuning Panel (DialKit-style visual parameter dialer) */}
-      {ENABLE_STAMP && (
+      {ENABLE_STAMP_ON_SITE && (
         <StampTuner
           config={stampConfig}
           onChange={setStampConfig}

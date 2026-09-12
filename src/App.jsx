@@ -353,7 +353,10 @@ export default function App() {
     setIsShuttering(true)
 
     const lineState = backgroundLineRef.current?.getCurrentState()
-    if (!lineState) return
+    if (!lineState) {
+      setIsShuttering(false)
+      return
+    }
 
     const {
       d,
@@ -443,28 +446,55 @@ export default function App() {
     const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const img = new Image()
-    img.onload = () => {
-      const offscreenCanvas = document.createElement('canvas')
-      offscreenCanvas.width = outW
-      offscreenCanvas.height = outH
-      const ctx = offscreenCanvas.getContext('2d')
-      ctx.drawImage(img, 0, 0, outW, outH)
-      URL.revokeObjectURL(url)
 
-      offscreenCanvas.toBlob((pngBlob) => {
-        if (!pngBlob) return
-        const downloadUrl = URL.createObjectURL(pngBlob)
-        const a = document.createElement('a')
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
-        const filenamePrefix = isMobile ? 'persweb-print-mobile' : 'persweb-print'
-        a.download = `${filenamePrefix}-${timestamp}.png`
-        a.href = downloadUrl
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        setTimeout(() => URL.revokeObjectURL(downloadUrl), 2000)
-      }, 'image/png')
+    const triggerDownload = (downloadUrl) => {
+      const a = document.createElement('a')
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+      const filenamePrefix = isMobile ? 'persweb-print-mobile' : 'persweb-print'
+      a.download = `${filenamePrefix}-${timestamp}.png`
+      a.href = downloadUrl
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
     }
+
+    img.onload = () => {
+      try {
+        const offscreenCanvas = document.createElement('canvas')
+        offscreenCanvas.width = outW
+        offscreenCanvas.height = outH
+        const ctx = offscreenCanvas.getContext('2d')
+        ctx.drawImage(img, 0, 0, outW, outH)
+        URL.revokeObjectURL(url)
+
+        if (offscreenCanvas.toBlob) {
+          offscreenCanvas.toBlob((pngBlob) => {
+            if (pngBlob) {
+              const downloadUrl = URL.createObjectURL(pngBlob)
+              triggerDownload(downloadUrl)
+              setTimeout(() => URL.revokeObjectURL(downloadUrl), 2000)
+            } else {
+              triggerDownload(offscreenCanvas.toDataURL('image/png'))
+            }
+            setIsShuttering(false)
+          }, 'image/png')
+        } else {
+          triggerDownload(offscreenCanvas.toDataURL('image/png'))
+          setIsShuttering(false)
+        }
+      } catch (err) {
+        console.error('Canvas export draw error:', err)
+        URL.revokeObjectURL(url)
+        setIsShuttering(false)
+      }
+    }
+
+    img.onerror = (err) => {
+      console.error('Export SVG image load error:', err)
+      URL.revokeObjectURL(url)
+      setIsShuttering(false)
+    }
+
     img.src = url
   }, [isShuttering, cardClicks, isMobile, stampConfig])
 

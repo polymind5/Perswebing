@@ -35,13 +35,13 @@ export const STAMP_CONFIG = {
   dotDistance: 241.5,      // Distance from center along major axis
 
   // Typography & Arcs
-  textRadiusX: 241.5,      // Text centerline semi-major axis (centered in channel)
-  textRadiusY: 146,        // Text centerline semi-minor axis (centered in channel)
+  textRadiusX: 255,        // Text centerline semi-major axis (centered between inner & outer ellipses)
+  textRadiusY: 154.5,      // Text centerline semi-minor axis (centered between inner & outer ellipses)
   clicksFontSize: 30,      // Font size for "{clicks} CLICKS"
   clicksLetterSpacing: 1.2,// Letter spacing for clicks
   dateFontSize: 28,        // Font size for timestamp
   dateLetterSpacing: 1.0,  // Letter spacing for timestamp
-  fontFamily: '"Michroma", sans-serif',
+  fontFamily: 'Michroma, sans-serif',
   fontWeight: '400',
 
   // Colors
@@ -49,7 +49,7 @@ export const STAMP_CONFIG = {
   greenColor: '#27AA20',   // Text and dot green color
 };
 
-export const STAMP_STORAGE_KEY = 'persweb_stamp_tuning_config_v2';
+export const STAMP_STORAGE_KEY = 'persweb_stamp_tuning_config_v3';
 
 export function loadSavedStampConfig() {
   if (typeof window === 'undefined') return { ...STAMP_CONFIG };
@@ -58,10 +58,10 @@ export function loadSavedStampConfig() {
     if (raw) {
       const parsed = JSON.parse(raw);
       const merged = { ...STAMP_CONFIG, ...parsed };
-      // Self-heal: ensure text radius is centered in channel (not inside inner ellipse 194.5)
-      if (!merged.textRadiusX || merged.textRadiusX < 210) {
-        merged.textRadiusX = 241.5;
-        merged.textRadiusY = 146;
+      // Self-heal: ensure text radius is centered in channel (>= 250)
+      if (!merged.textRadiusX || merged.textRadiusX < 250) {
+        merged.textRadiusX = 255;
+        merged.textRadiusY = 154.5;
       }
       return merged;
     }
@@ -192,6 +192,7 @@ export function getStampSvgString({ clicks = 0, timestamp, customConfig = {} } =
   const formattedDate = typeof timestamp === 'string' ? timestamp : formatStampDate(timestamp || new Date());
   const lowerArcD = `M ${-cfg.textRadiusX} 0 A ${cfg.textRadiusX} ${cfg.textRadiusY} 0 0 0 ${cfg.textRadiusX} 0`;
   const upperArcD = `M ${cfg.textRadiusX} 0 A ${cfg.textRadiusX} ${cfg.textRadiusY} 0 0 0 ${-cfg.textRadiusX} 0`;
+  const safeFontFamily = (cfg.fontFamily || 'Michroma, sans-serif').replace(/["']/g, '').trim();
 
   return `
     <g transform="translate(${cfg.x}, ${cfg.y}) scale(${cfg.scale}) rotate(${cfg.rotation})">
@@ -203,10 +204,10 @@ export function getStampSvgString({ clicks = 0, timestamp, customConfig = {} } =
       <ellipse cx="0" cy="0" rx="${cfg.rxInner}" ry="${cfg.ryInner}" fill="none" stroke="${cfg.blackColor}" stroke-width="${cfg.innerStroke}" />
       <circle cx="${cfg.dotDistance}" cy="0" r="${cfg.dotRadius}" fill="${cfg.greenColor}" />
       <circle cx="${-cfg.dotDistance}" cy="0" r="${cfg.dotRadius}" fill="${cfg.greenColor}" />
-      <text font-family="${cfg.fontFamily}" font-size="${cfg.clicksFontSize}" font-weight="${cfg.fontWeight}" fill="${cfg.greenColor}" letter-spacing="${cfg.clicksLetterSpacing}" dominant-baseline="central">
+      <text font-family="${safeFontFamily}" font-size="${cfg.clicksFontSize}" font-weight="${cfg.fontWeight}" fill="${cfg.greenColor}" letter-spacing="${cfg.clicksLetterSpacing}" dominant-baseline="central">
         <textPath href="#export-stamp-lower" startOffset="50%" text-anchor="middle">${clicksText}</textPath>
       </text>
-      <text font-family="${cfg.fontFamily}" font-size="${cfg.dateFontSize}" font-weight="${cfg.fontWeight}" fill="${cfg.greenColor}" letter-spacing="${cfg.dateLetterSpacing}" dominant-baseline="central">
+      <text font-family="${safeFontFamily}" font-size="${cfg.dateFontSize}" font-weight="${cfg.fontWeight}" fill="${cfg.greenColor}" letter-spacing="${cfg.dateLetterSpacing}" dominant-baseline="central">
         <textPath href="#export-stamp-upper" startOffset="50%" text-anchor="middle">${formattedDate}</textPath>
       </text>
     </g>

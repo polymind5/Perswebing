@@ -16,40 +16,41 @@ import React, { useState, useEffect, useId, useMemo } from 'react';
 // ─── TUNING PARAMETERS (Tweak these freely to adjust the look & placement) ───
 export const STAMP_CONFIG = {
   // Placement on 1440 x 1020 Canvas
-  x: 1240,                 // <-- Line 20: Center X on canvas (tweak left/right)
-  y: 300,                  // <-- Line 21: Center Y on canvas (tweak up/down)
-  scale: 0.48,             // <-- Line 22: Overall stamp scale factor (0.45 - 0.55)
-  rotation: -60.4,         // <-- Line 23: Tilt angle in degrees (-60.4° matches reference)
-  liveClock: true,         // <-- Line 24: True = clock ticks live; False = locked to session start
+  x: 1295,
+  y: 300,
+  scale: 0.35,
+  rotation: -72.2,
+  liveClock: true,
+  showOnCanvas: true,
 
   // Ellipse Geometry (base unit size before scale)
-  rxOuter: 292,            // Outer ellipse semi-major axis
-  ryOuter: 177,            // Outer ellipse semi-minor axis
-  rxInner: 194.5,          // Inner ellipse semi-major axis
-  ryInner: 118,            // Inner ellipse semi-minor axis
-  outerStroke: 20,         // Bold black border stroke width
-  innerStroke: 6.5,        // Fine black inner border stroke width
+  rxOuter: 292,
+  ryOuter: 177,
+  rxInner: 194.5,
+  ryInner: 118,
+  outerStroke: 14,
+  innerStroke: 6.5,
 
   // Apex Green Dots
-  dotRadius: 10.5,         // Radius of green dots
-  dotDistance: 241.5,      // Distance from center along major axis
+  dotRadius: 10.5,
+  dotDistance: 241.5,
 
   // Typography & Arcs
-  textRadiusX: 255,        // Text centerline semi-major axis (centered between inner & outer ellipses)
-  textRadiusY: 154.5,      // Text centerline semi-minor axis (centered between inner & outer ellipses)
-  clicksFontSize: 30,      // Font size for "{clicks} CLICKS"
-  clicksLetterSpacing: 1.2,// Letter spacing for clicks
-  dateFontSize: 28,        // Font size for timestamp
-  dateLetterSpacing: 1.0,  // Letter spacing for timestamp
+  textRadiusX: 255,
+  textRadiusY: 142,
+  clicksFontSize: 34,
+  clicksLetterSpacing: 1.2,
+  dateFontSize: 28,
+  dateLetterSpacing: 1.0,
   fontFamily: 'Michroma, sans-serif',
   fontWeight: '400',
 
   // Colors
-  blackColor: '#1E1E1E',   // Ring stroke color
-  greenColor: '#27AA20',   // Text and dot green color
+  blackColor: '#1E1E1E',
+  greenColor: '#27AA20',
 };
 
-export const STAMP_STORAGE_KEY = 'persweb_stamp_tuning_config_v3';
+export const STAMP_STORAGE_KEY = 'persweb_stamp_tuning_config_v4';
 
 export function loadSavedStampConfig() {
   if (typeof window === 'undefined') return { ...STAMP_CONFIG };
@@ -61,7 +62,7 @@ export function loadSavedStampConfig() {
       // Self-heal: ensure text radius is centered in channel (>= 250)
       if (!merged.textRadiusX || merged.textRadiusX < 250) {
         merged.textRadiusX = 255;
-        merged.textRadiusY = 154.5;
+        merged.textRadiusY = 142;
       }
       return merged;
     }

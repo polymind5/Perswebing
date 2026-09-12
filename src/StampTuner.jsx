@@ -3,16 +3,20 @@ import { STAMP_CONFIG, STAMP_STORAGE_KEY as STORAGE_KEY } from './CanvasStamp';
 
 const PRESETS = {
   defaultMichroma: {
-    name: 'Default (Michroma)',
+    name: 'User Dialed (Michroma)',
     config: {
       ...STAMP_CONFIG,
+      x: 1295,
+      y: 300,
+      scale: 0.35,
+      rotation: -72.2,
       textRadiusX: 255,
-      textRadiusY: 154.5,
-      fontFamily: 'Michroma, sans-serif',
-      clicksFontSize: 30,
+      textRadiusY: 142,
+      clicksFontSize: 34,
       clicksLetterSpacing: 1.2,
       dateFontSize: 28,
       dateLetterSpacing: 1.0,
+      fontFamily: 'Michroma, sans-serif',
       fontWeight: '400',
     },
   },

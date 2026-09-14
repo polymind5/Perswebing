@@ -18,9 +18,9 @@ const BACKGROUND_LINE_CONFIG = {
   alpha: 0.38,             // Increased opacity (crisp & clearly visible green)
   strokeWidth: 4.17,       // Matches 4.17px in Affinity Designer export (~2.67px on canvas)
   mobileStrokeWidth: 5.2,  // Slightly bolder stroke for phone displays
-  baseSpeed: 2.5,          // Ambient growth speed (units / frame)
-  burstSpeed: 48,          // Burst speed when cycling cards
-  burstDecay: 0.95,        // Decay factor per frame (closer to 1 = longer burst)
+  baseSpeed: 4.8,          // Ambient growth speed (units / frame) - increased for faster standard progression
+  burstSpeed: 80,          // Burst speed when cycling cards - punchier surge
+  burstDecay: 0.96,        // Decay factor per frame (closer to 1 = longer burst)
   initialBurst: true,      // Start with a burst when site opens
   loopOnComplete: false,   // When complete, the line stays visible
 
@@ -55,6 +55,7 @@ const BackgroundLine = forwardRef(function BackgroundLine(
   const pathRef = useRef(null);
   const triggerBurstRef = useRef(() => { });
   const resetRef = useRef(() => { });
+  const setProgressRef = useRef(() => { });
   const getCurrentStateRef = useRef(() => ({}));
   const isPausedRef = useRef(isPaused);
   const onProgressRef = useRef(onProgress);
@@ -70,6 +71,7 @@ const BackgroundLine = forwardRef(function BackgroundLine(
   useImperativeHandle(ref, () => ({
     triggerBurst: () => triggerBurstRef.current(),
     reset: () => resetRef.current(),
+    setProgress: (progress) => setProgressRef.current(progress),
     getCurrentState: () => getCurrentStateRef.current(),
   }));
 
@@ -89,7 +91,7 @@ const BackgroundLine = forwardRef(function BackgroundLine(
 
     // Trigger burst mode (accumulates slightly on rapid cycling, capped safely)
     const triggerBurst = () => {
-      currentSpeed = Math.max(burstSpeed, Math.min(110, currentSpeed + 30));
+      currentSpeed = Math.max(burstSpeed, Math.min(145, currentSpeed + 36));
       if (isComplete && loopOnComplete) {
         currentLength = 0;
         isComplete = false;
@@ -105,6 +107,20 @@ const BackgroundLine = forwardRef(function BackgroundLine(
       onProgressRef.current?.(0);
     };
     resetRef.current = reset;
+
+    const setProgress = (progress) => {
+      const clamped = Math.max(0, Math.min(1, progress));
+      currentLength = clamped * totalLength;
+      currentSpeed = baseSpeed;
+      if (clamped >= 1) {
+        isComplete = !loopOnComplete;
+      } else {
+        isComplete = false;
+      }
+      path.style.strokeDashoffset = `${Math.max(0, totalLength - currentLength)}`;
+      onProgressRef.current?.(clamped);
+    };
+    setProgressRef.current = setProgress;
 
     const getCurrentState = () => ({
       d: BACKGROUND_PATH_D,

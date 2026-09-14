@@ -352,8 +352,48 @@ export default function App() {
   const [stampConfig, setStampConfig] = useState(() => loadSavedStampConfig())
   const [showStampTuner, setShowStampTuner] = useState(true)
 
+  // ── Pull-down line scrubber state & handlers ──
+  const [isScrubbing, setIsScrubbing] = useState(false)
+  const isDraggingScrubberRef = useRef(false)
+  const hasDraggedFarRef = useRef(false)
+  const lastScrubProgressRef = useRef(0)
+
+  const handleScrubberDragStart = useCallback(() => {
+    isDraggingScrubberRef.current = true
+    hasDraggedFarRef.current = false
+    setIsScrubbing(true)
+  }, [])
+
+  const handleScrubberDrag = useCallback((event, info) => {
+    // Discriminate tap from drag with a 4px threshold
+    if (Math.abs(info.offset.y) > 4) {
+      hasDraggedFarRef.current = true
+    }
+    if (hasDraggedFarRef.current) {
+      // 0 to 150px pull area maps linearly to 0% to 100% line animation progress
+      const progress = Math.max(0, Math.min(1, info.offset.y / 150))
+      lastScrubProgressRef.current = progress
+      backgroundLineRef.current?.setProgress(progress)
+      handleLineProgress(progress)
+    }
+  }, [handleLineProgress])
+
+  const handleScrubberDragEnd = useCallback(() => {
+    isDraggingScrubberRef.current = false
+    setIsScrubbing(false)
+    if (hasDraggedFarRef.current) {
+      // Hold line and outer ring at the scrubbed percentage upon spring release
+      backgroundLineRef.current?.setProgress(lastScrubProgressRef.current)
+      handleLineProgress(lastScrubProgressRef.current)
+    }
+    // Prevent accidental export click on drag release
+    setTimeout(() => {
+      hasDraggedFarRef.current = false
+    }, 120)
+  }, [handleLineProgress])
+
   const handleExportPrint = useCallback(() => {
-    if (isShuttering || isCameraFlashing) return
+    if (isShuttering || isCameraFlashing || isScrubbing || hasDraggedFarRef.current) return
     setIsShuttering(true)
     setIsCameraFlashing(true)
     playShutterSound()
@@ -1358,7 +1398,7 @@ export default function App() {
             >
               <BackgroundLine
                 ref={backgroundLineRef}
-                isPaused={view !== 'home'}
+                isPaused={view !== 'home' || isScrubbing}
                 isMobile={isMobile}
                 onProgress={handleLineProgress}
               />
@@ -1688,12 +1728,27 @@ export default function App() {
             left: mobileControls.dotInset, top: mobileControls.dotInset,
           } : { cursor: 'pointer', zIndex: 1101 }}
         />
-        <div
-          className={`corner-dot corner-dot--tr ${ENABLE_BACKGROUND_LINE ? 'has-progress-ring' : ''}`}
+        <motion.div
+          className={`corner-dot corner-dot--tr ${ENABLE_BACKGROUND_LINE ? 'has-progress-ring' : ''} ${isScrubbing ? 'is-scrubbing' : ''}`}
           role="button"
           tabIndex={0}
-          aria-label="Export line drawing print"
-          onClick={handleExportPrint}
+          aria-label="Export line drawing print and animation scrubber"
+          drag="y"
+          dragDirectionLock
+          dragConstraints={{ top: 0, bottom: 150 }}
+          dragElastic={{ top: 0, bottom: 0.1 }}
+          dragSnapToOrigin
+          dragTransition={{ bounceStiffness: 420, bounceDamping: 24 }}
+          onDragStart={handleScrubberDragStart}
+          onDrag={handleScrubberDrag}
+          onDragEnd={handleScrubberDragEnd}
+          onClick={(e) => {
+            if (hasDraggedFarRef.current || isScrubbing) {
+              e.preventDefault();
+              return;
+            }
+            handleExportPrint();
+          }}
           onMouseEnter={() => setIsDotHovered(true)}
           onMouseLeave={() => setIsDotHovered(false)}
           onFocus={() => setIsDotHovered(true)}
@@ -1709,10 +1764,10 @@ export default function App() {
             width: mobileControls.dotSize, height: mobileControls.dotSize,
             right: mobileControls.dotInset, top: mobileControls.dotInset,
             left: 'auto',
-            cursor: 'pointer',
+            touchAction: 'none',
             zIndex: 1101,
           } : {
-            cursor: 'pointer',
+            touchAction: 'none',
             zIndex: 1101,
           }}
         >
@@ -1724,7 +1779,7 @@ export default function App() {
             >
               {/* Concentric circular hover indicator text */}
               <AnimatePresence>
-                {isDotHovered && (
+                {isDotHovered && !isScrubbing && (
                   <motion.g
                     initial={{ opacity: 0, scale: 0.94 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -1796,7 +1851,7 @@ export default function App() {
               </motion.g>
             </svg>
           )}
-        </div>
+        </motion.div>
         <div className="corner-dot corner-dot--bl"
           style={isMobile ? {
             position: 'fixed',

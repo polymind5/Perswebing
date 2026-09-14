@@ -15,7 +15,7 @@
 
 export const CARD_CLICK_CONFIG = {
   enabled: true,
-  volume: 0.20,              // Soft, comfortable volume floor (0.0 to 1.0)
+  volume: 0.15,              // Soft, comfortable volume floor (0.0 to 1.0)
   baseFreq: 530,             // Warm fundamental frequency (Hz)
   pitchJitter: 0.045,        // ±4.5% random detuning per click (humanization)
   decay: 0.018,              // Ultra-fast decay duration in seconds (~18ms)
@@ -39,7 +39,7 @@ function getAudioContext() {
     cachedAudioCtx = new AudioCtx();
   }
   if (cachedAudioCtx.state === 'suspended') {
-    cachedAudioCtx.resume().catch(() => {});
+    cachedAudioCtx.resume().catch(() => { });
   }
   return cachedAudioCtx;
 }
@@ -57,9 +57,9 @@ export function playCardCycleSound(overrides = {}) {
     try {
       const audio = new Audio(cfg.audioUrl);
       audio.volume = Math.max(0, Math.min(1, cfg.volume));
-      audio.play().catch(() => {});
+      audio.play().catch(() => { });
       return;
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // Mode 2: Procedural organic paper/cardstock synthesis

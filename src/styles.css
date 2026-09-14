@@ -458,10 +458,16 @@ body {
 
 .corner-dot--tr.has-progress-ring {
   background: transparent;
-  cursor: pointer;
+  cursor: grab;
   outline: none;
   user-select: none;
+  touch-action: none;
   -webkit-tap-highlight-color: transparent;
+}
+
+.corner-dot--tr.has-progress-ring:active,
+.corner-dot--tr.has-progress-ring.is-scrubbing {
+  cursor: grabbing;
 }
 
 .corner-dot--tr.has-progress-ring::before {

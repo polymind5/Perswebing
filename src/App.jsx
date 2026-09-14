@@ -353,29 +353,40 @@ export default function App() {
   const [showStampTuner, setShowStampTuner] = useState(true)
 
   // ── Pull-down line scrubber state & handlers ──
+  const SCRUB_AREA_DISTANCE = 125
   const [isScrubbing, setIsScrubbing] = useState(false)
   const isDraggingScrubberRef = useRef(false)
   const hasDraggedFarRef = useRef(false)
   const lastScrubProgressRef = useRef(0)
+  const startProgressRef = useRef(0)
 
   const handleScrubberDragStart = useCallback(() => {
     isDraggingScrubberRef.current = true
     hasDraggedFarRef.current = false
     setIsScrubbing(true)
+
+    // Capture the line's current progress at drag initiation
+    const currentLineState = backgroundLineRef.current?.getCurrentState()
+    const currentProg = currentLineState?.progress || 0
+    // If the line is already complete (>= 99%), start fresh from 0 for re-scrubbing
+    startProgressRef.current = currentProg >= 0.999 ? 0 : currentProg
   }, [])
 
   const handleScrubberDrag = useCallback((event, info) => {
-    // Discriminate tap from drag with a 4px threshold
-    if (Math.abs(info.offset.y) > 4) {
+    if (Math.abs(info.offset.y) > 2) {
       hasDraggedFarRef.current = true
     }
-    if (hasDraggedFarRef.current) {
-      // 0 to 150px pull area maps linearly to 0% to 100% line animation progress
-      const progress = Math.max(0, Math.min(1, info.offset.y / 150))
-      lastScrubProgressRef.current = progress
-      backgroundLineRef.current?.setProgress(progress)
-      handleLineProgress(progress)
-    }
+
+    // 0 to 125px pull area maps smoothly to 0 -> 1 progress ratio
+    const pullRatio = Math.max(0, Math.min(1, info.offset.y / SCRUB_AREA_DISTANCE))
+
+    // Seamlessly interpolate from current starting progress to 100% completion without any initial jerk
+    const startP = startProgressRef.current
+    const progress = startP + (1 - startP) * pullRatio
+
+    lastScrubProgressRef.current = progress
+    backgroundLineRef.current?.setProgress(progress)
+    handleLineProgress(progress)
   }, [handleLineProgress])
 
   const handleScrubberDragEnd = useCallback(() => {
@@ -1728,15 +1739,62 @@ export default function App() {
             left: mobileControls.dotInset, top: mobileControls.dotInset,
           } : { cursor: 'pointer', zIndex: 1101 }}
         />
+        {/* ── Scrubber Track Dissecting Lines ── */}
+        <AnimatePresence>
+          {isScrubbing && (
+            <motion.div
+              className="scrubber-track"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              style={isMobile ? {
+                position: 'fixed',
+                right: mobileControls.dotInset,
+                top: mobileControls.dotInset,
+                width: mobileControls.dotSize,
+                pointerEvents: 'none',
+                zIndex: 1100,
+              } : {
+                position: 'absolute',
+                right: 30,
+                top: 30,
+                width: 25,
+                pointerEvents: 'none',
+                zIndex: 1100,
+              }}
+              aria-hidden="true"
+            >
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
+                const dotS = isMobile ? mobileControls.dotSize : 25;
+                const lineWidth = dotS * 1.35;
+                // 9 dissecting lines spanning from below resting dot to end of 125px scrub area
+                const startY = dotS + 10;
+                const endY = (dotS / 2) + SCRUB_AREA_DISTANCE;
+                const yPos = startY + i * ((endY - startY) / 8);
+                return (
+                  <div
+                    key={i}
+                    className="scrubber-track-line"
+                    style={{
+                      top: `${yPos}px`,
+                      width: `${lineWidth}px`,
+                    }}
+                  />
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <motion.div
           className={`corner-dot corner-dot--tr ${ENABLE_BACKGROUND_LINE ? 'has-progress-ring' : ''} ${isScrubbing ? 'is-scrubbing' : ''}`}
           role="button"
           tabIndex={0}
           aria-label="Export line drawing print and animation scrubber"
           drag="y"
-          dragDirectionLock
-          dragConstraints={{ top: 0, bottom: 150 }}
-          dragElastic={{ top: 0, bottom: 0.1 }}
+          dragConstraints={{ top: 0, bottom: SCRUB_AREA_DISTANCE }}
+          dragElastic={{ top: 0, bottom: 0.08 }}
           dragSnapToOrigin
           dragTransition={{ bounceStiffness: 420, bounceDamping: 24 }}
           onDragStart={handleScrubberDragStart}

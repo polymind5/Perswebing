@@ -18,9 +18,9 @@ const BACKGROUND_LINE_CONFIG = {
   alpha: 0.38,             // Increased opacity (crisp & clearly visible green)
   strokeWidth: 4.17,       // Matches 4.17px in Affinity Designer export (~2.67px on canvas)
   mobileStrokeWidth: 5.2,  // Slightly bolder stroke for phone displays
-  baseSpeed: 4.8,          // Ambient growth speed (units / frame) - increased for faster standard progression
-  burstSpeed: 80,          // Burst speed when cycling cards - punchier surge
-  burstDecay: 0.96,        // Decay factor per frame (closer to 1 = longer burst)
+  baseSpeed: 3.8,          // Ambient growth speed (units / frame) - tuned to standard 3.8
+  burstSpeed: 65,          // Burst speed when cycling cards - tuned to 65
+  burstDecay: 0.955,       // Decay factor per frame (closer to 1 = longer burst)
   initialBurst: true,      // Start with a burst when site opens
   loopOnComplete: false,   // When complete, the line stays visible
 
@@ -91,7 +91,7 @@ const BackgroundLine = forwardRef(function BackgroundLine(
 
     // Trigger burst mode (accumulates slightly on rapid cycling, capped safely)
     const triggerBurst = () => {
-      currentSpeed = Math.max(burstSpeed, Math.min(145, currentSpeed + 36));
+      currentSpeed = Math.max(burstSpeed, Math.min(130, currentSpeed + 30));
       if (isComplete && loopOnComplete) {
         currentLength = 0;
         isComplete = false;

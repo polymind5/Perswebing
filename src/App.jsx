@@ -1896,7 +1896,7 @@ export default function App() {
       {isCameraFlashing && createPortal(
         <motion.div
           key="screenshot-shutter-flash"
-          initial={{ opacity: 0.85 }}
+          initial={{ opacity: 0.70 }}
           animate={{ opacity: 0 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}

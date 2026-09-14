@@ -44,6 +44,7 @@ export const STAMP_CONFIG = {
   dateLetterSpacing: 1.0,
   fontFamily: 'Michroma, sans-serif',
   fontWeight: '400',
+  textStroke: 0.8, // Fine black stroke outline on text
 
   // Colors
   blackColor: '#1E1E1E',
@@ -63,6 +64,9 @@ export function loadSavedStampConfig() {
       if (!merged.textRadiusX || merged.textRadiusX < 250) {
         merged.textRadiusX = 255;
         merged.textRadiusY = 142;
+      }
+      if (merged.textStroke === undefined) {
+        merged.textStroke = 0.8;
       }
       return merged;
     }
@@ -162,8 +166,13 @@ export default function CanvasStamp({
         fontSize={cfg.clicksFontSize}
         fontWeight={cfg.fontWeight}
         fill={cfg.greenColor}
+        stroke={cfg.blackColor}
+        strokeWidth={cfg.textStroke ?? 0.8}
+        paintOrder="stroke fill"
+        strokeLinejoin="round"
         letterSpacing={cfg.clicksLetterSpacing}
         dominantBaseline="central"
+        style={{ paintOrder: 'stroke fill' }}
       >
         <textPath href={`#${lowerPathId}`} startOffset="50%" textAnchor="middle">
           {clicksText}
@@ -176,8 +185,13 @@ export default function CanvasStamp({
         fontSize={cfg.dateFontSize}
         fontWeight={cfg.fontWeight}
         fill={cfg.greenColor}
+        stroke={cfg.blackColor}
+        strokeWidth={cfg.textStroke ?? 0.8}
+        paintOrder="stroke fill"
+        strokeLinejoin="round"
         letterSpacing={cfg.dateLetterSpacing}
         dominantBaseline="central"
+        style={{ paintOrder: 'stroke fill' }}
       >
         <textPath href={`#${upperPathId}`} startOffset="50%" textAnchor="middle">
           {formattedDate}
@@ -194,6 +208,9 @@ export function getStampSvgString({ clicks = 0, timestamp, customConfig = {} } =
   const lowerArcD = `M ${-cfg.textRadiusX} 0 A ${cfg.textRadiusX} ${cfg.textRadiusY} 0 0 0 ${cfg.textRadiusX} 0`;
   const upperArcD = `M ${cfg.textRadiusX} 0 A ${cfg.textRadiusX} ${cfg.textRadiusY} 0 0 0 ${-cfg.textRadiusX} 0`;
   const safeFontFamily = (cfg.fontFamily || 'Michroma, sans-serif').replace(/["']/g, '').trim();
+  const textStrokeAttr = (cfg.textStroke ?? 0.8) > 0
+    ? `stroke="${cfg.blackColor}" stroke-width="${cfg.textStroke ?? 0.8}" paint-order="stroke fill" stroke-linejoin="round"`
+    : '';
 
   return `
     <g transform="translate(${cfg.x}, ${cfg.y}) scale(${cfg.scale}) rotate(${cfg.rotation})">
@@ -205,10 +222,10 @@ export function getStampSvgString({ clicks = 0, timestamp, customConfig = {} } =
       <ellipse cx="0" cy="0" rx="${cfg.rxInner}" ry="${cfg.ryInner}" fill="none" stroke="${cfg.blackColor}" stroke-width="${cfg.innerStroke}" />
       <circle cx="${cfg.dotDistance}" cy="0" r="${cfg.dotRadius}" fill="${cfg.greenColor}" />
       <circle cx="${-cfg.dotDistance}" cy="0" r="${cfg.dotRadius}" fill="${cfg.greenColor}" />
-      <text font-family="${safeFontFamily}" font-size="${cfg.clicksFontSize}" font-weight="${cfg.fontWeight}" fill="${cfg.greenColor}" letter-spacing="${cfg.clicksLetterSpacing}" dominant-baseline="central">
+      <text font-family="${safeFontFamily}" font-size="${cfg.clicksFontSize}" font-weight="${cfg.fontWeight}" fill="${cfg.greenColor}" ${textStrokeAttr} letter-spacing="${cfg.clicksLetterSpacing}" dominant-baseline="central">
         <textPath href="#export-stamp-lower" startOffset="50%" text-anchor="middle">${clicksText}</textPath>
       </text>
-      <text font-family="${safeFontFamily}" font-size="${cfg.dateFontSize}" font-weight="${cfg.fontWeight}" fill="${cfg.greenColor}" letter-spacing="${cfg.dateLetterSpacing}" dominant-baseline="central">
+      <text font-family="${safeFontFamily}" font-size="${cfg.dateFontSize}" font-weight="${cfg.fontWeight}" fill="${cfg.greenColor}" ${textStrokeAttr} letter-spacing="${cfg.dateLetterSpacing}" dominant-baseline="central">
         <textPath href="#export-stamp-upper" startOffset="50%" text-anchor="middle">${formattedDate}</textPath>
       </text>
     </g>

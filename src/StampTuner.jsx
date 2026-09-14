@@ -18,6 +18,7 @@ const PRESETS = {
       dateLetterSpacing: 1.0,
       fontFamily: 'Michroma, sans-serif',
       fontWeight: '400',
+      textStroke: 0.8,
     },
   },
   tightReference: {
@@ -502,6 +503,17 @@ export default function StampTuner({
                   min={30}
                   max={250}
                   step={0.5}
+                  onChange={updateParam}
+                />
+
+                <div className="tuner-section-title" style={{ marginTop: 14 }}>Text Stroke (Hairline Outline)</div>
+                <ControlSlider
+                  label="Black Stroke Width"
+                  paramKey="textStroke"
+                  value={config.textStroke ?? 0.8}
+                  min={0}
+                  max={3}
+                  step={0.1}
                   onChange={updateParam}
                 />
               </div>

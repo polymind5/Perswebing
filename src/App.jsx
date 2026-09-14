@@ -7,6 +7,7 @@ import { Analytics } from '@vercel/analytics/react'
 import BackgroundLine from './BackgroundLine'
 import CanvasStamp, { STAMP_CONFIG, getStampSvgString, loadSavedStampConfig } from './CanvasStamp'
 import StampTuner from './StampTuner'
+import { playShutterSound } from './shutterSound'
 
 // Master switches: easily enable or disable canvas features
 const ENABLE_BACKGROUND_LINE = true
@@ -354,6 +355,7 @@ export default function App() {
     if (isShuttering || isCameraFlashing) return
     setIsShuttering(true)
     setIsCameraFlashing(true)
+    playShutterSound()
     setTimeout(() => {
       setIsCameraFlashing(false)
     }, 250)

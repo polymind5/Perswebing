@@ -352,13 +352,47 @@ export default function App() {
   const [stampConfig, setStampConfig] = useState(() => loadSavedStampConfig())
   const [showStampTuner, setShowStampTuner] = useState(true)
 
-  // ── Pull-down line scrubber state & handlers ──
+  // ── Pull-down line scrubber state & motion values ──
   const SCRUB_AREA_DISTANCE = 125
+  const FIRST_LINE_DISTANCE = 24
   const [isScrubbing, setIsScrubbing] = useState(false)
   const isDraggingScrubberRef = useRef(false)
   const hasDraggedFarRef = useRef(false)
   const lastScrubProgressRef = useRef(0)
   const startProgressRef = useRef(0)
+
+  // Direct physical Y position of the corner button during scrub & spring snapback
+  const scrubberY = useMotionValue(0)
+
+  // Dissecting lines fade in as the dot scrubs towards the first line (0px -> 24px)
+  const trackLinesOpacity = useTransform(
+    scrubberY,
+    [0, FIRST_LINE_DISTANCE],
+    [0, 1],
+    { clamp: true }
+  )
+
+  // Hover text dissolves as the dot scrubs towards the first line (0px -> 24px)
+  const hoverTextScrubOpacity = useTransform(
+    scrubberY,
+    [0, FIRST_LINE_DISTANCE],
+    [1, 0],
+    { clamp: true }
+  )
+
+  // Elastic spring activated if pulling past the 125px end point
+  const trackOverscrollY = useTransform(scrubberY, (y) => (y > SCRUB_AREA_DISTANCE ? (y - SCRUB_AREA_DISTANCE) * 0.75 : 0))
+  const trackSpringY = useSpring(trackOverscrollY, {
+    stiffness: 450,
+    damping: 18,
+    mass: 0.6,
+  })
+
+  const trackScaleY = useTransform(scrubberY, (y) => (y > SCRUB_AREA_DISTANCE ? 1 + (y - SCRUB_AREA_DISTANCE) * 0.0025 : 1))
+  const trackSpringScaleY = useSpring(trackScaleY, {
+    stiffness: 450,
+    damping: 18,
+  })
 
   const handleScrubberDragStart = useCallback(() => {
     isDraggingScrubberRef.current = true
@@ -1740,52 +1774,52 @@ export default function App() {
           } : { cursor: 'pointer', zIndex: 1101 }}
         />
         {/* ── Scrubber Track Dissecting Lines ── */}
-        <AnimatePresence>
-          {isScrubbing && (
-            <motion.div
-              className="scrubber-track"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              style={isMobile ? {
-                position: 'fixed',
-                right: mobileControls.dotInset,
-                top: mobileControls.dotInset,
-                width: mobileControls.dotSize,
-                pointerEvents: 'none',
-                zIndex: 1100,
-              } : {
-                position: 'absolute',
-                right: 30,
-                top: 30,
-                width: 25,
-                pointerEvents: 'none',
-                zIndex: 1100,
-              }}
-              aria-hidden="true"
-            >
-              {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
-                const dotS = isMobile ? mobileControls.dotSize : 25;
-                const lineWidth = dotS * 1.35;
-                // 9 dissecting lines spanning from below resting dot to end of 125px scrub area
-                const startY = dotS + 10;
-                const endY = (dotS / 2) + SCRUB_AREA_DISTANCE;
-                const yPos = startY + i * ((endY - startY) / 8);
-                return (
-                  <div
-                    key={i}
-                    className="scrubber-track-line"
-                    style={{
-                      top: `${yPos}px`,
-                      width: `${lineWidth}px`,
-                    }}
-                  />
-                );
-              })}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <motion.div
+          className="scrubber-track"
+          style={isMobile ? {
+            position: 'fixed',
+            right: mobileControls.dotInset,
+            top: mobileControls.dotInset,
+            width: mobileControls.dotSize,
+            pointerEvents: 'none',
+            zIndex: 1100,
+            opacity: trackLinesOpacity,
+            y: trackSpringY,
+            scaleY: trackSpringScaleY,
+            transformOrigin: 'top center',
+          } : {
+            position: 'absolute',
+            right: 30,
+            top: 30,
+            width: 25,
+            pointerEvents: 'none',
+            zIndex: 1100,
+            opacity: trackLinesOpacity,
+            y: trackSpringY,
+            scaleY: trackSpringScaleY,
+            transformOrigin: 'top center',
+          }}
+          aria-hidden="true"
+        >
+          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
+            const dotS = isMobile ? mobileControls.dotSize : 25;
+            // Width smaller than dot (0.6x dot diameter, e.g. ~15px on desktop)
+            const lineWidth = dotS * 0.6;
+            const startY = FIRST_LINE_DISTANCE;
+            const endY = SCRUB_AREA_DISTANCE;
+            const yPos = startY + i * ((endY - startY) / 8);
+            return (
+              <div
+                key={i}
+                className="scrubber-track-line"
+                style={{
+                  top: `${yPos}px`,
+                  width: `${lineWidth}px`,
+                }}
+              />
+            );
+          })}
+        </motion.div>
 
         <motion.div
           className={`corner-dot corner-dot--tr ${ENABLE_BACKGROUND_LINE ? 'has-progress-ring' : ''} ${isScrubbing ? 'is-scrubbing' : ''}`}
@@ -1794,7 +1828,7 @@ export default function App() {
           aria-label="Export line drawing print and animation scrubber"
           drag="y"
           dragConstraints={{ top: 0, bottom: SCRUB_AREA_DISTANCE }}
-          dragElastic={{ top: 0, bottom: 0.08 }}
+          dragElastic={{ top: 0, bottom: 0.22 }}
           dragSnapToOrigin
           dragTransition={{ bounceStiffness: 420, bounceDamping: 24 }}
           onDragStart={handleScrubberDragStart}
@@ -1824,9 +1858,11 @@ export default function App() {
             left: 'auto',
             touchAction: 'none',
             zIndex: 1101,
+            y: scrubberY,
           } : {
             touchAction: 'none',
             zIndex: 1101,
+            y: scrubberY,
           }}
         >
           {ENABLE_BACKGROUND_LINE && (
@@ -1837,7 +1873,7 @@ export default function App() {
             >
               {/* Concentric circular hover indicator text */}
               <AnimatePresence>
-                {isDotHovered && !isScrubbing && (
+                {isDotHovered && (
                   <motion.g
                     initial={{ opacity: 0, scale: 0.94 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -1845,42 +1881,45 @@ export default function App() {
                     transition={{ duration: 0.18, ease: 'easeOut' }}
                     style={{ transformOrigin: '50px 50px', pointerEvents: 'none' }}
                   >
-                    <g transform={`translate(${HOVER_ARC_CONFIG.offsetX || 0}, ${HOVER_ARC_CONFIG.offsetY || 0})`}>
-                      <defs>
-                        <path
-                          id="tr-download-path"
-                          d={ARC1_PATH_D}
-                          fill="none"
-                        />
-                        <path
-                          id="tr-clicks-path"
-                          d={ARC2_PATH_D}
-                          fill="none"
-                        />
-                      </defs>
-                      <text
-                        fontFamily={HOVER_ARC_CONFIG.fontFamily}
-                        fontSize={HOVER_ARC_CONFIG.arc1FontSize}
-                        fontWeight="500"
-                        fill="#1E1E1E"
-                        letterSpacing="0.2"
-                      >
-                        <textPath href="#tr-download-path" startOffset={HOVER_ARC_CONFIG.arc1StartOffset}>
-                          Click to Download ↑
-                        </textPath>
-                      </text>
-                      <text
-                        fontFamily={HOVER_ARC_CONFIG.fontFamily}
-                        fontSize={HOVER_ARC_CONFIG.arc2FontSize}
-                        fontWeight="600"
-                        fill="#1E1E1E"
-                        letterSpacing="0.3"
-                      >
-                        <textPath href="#tr-clicks-path" startOffset="50%" textAnchor="middle">
-                          {`${cardClicks} ${cardClicks === 1 ? 'click' : 'clicks'}`}
-                        </textPath>
-                      </text>
-                    </g>
+                    {/* Scrub-driven dissolve towards first line */}
+                    <motion.g style={{ opacity: hoverTextScrubOpacity }}>
+                      <g transform={`translate(${HOVER_ARC_CONFIG.offsetX || 0}, ${HOVER_ARC_CONFIG.offsetY || 0})`}>
+                        <defs>
+                          <path
+                            id="tr-download-path"
+                            d={ARC1_PATH_D}
+                            fill="none"
+                          />
+                          <path
+                            id="tr-clicks-path"
+                            d={ARC2_PATH_D}
+                            fill="none"
+                          />
+                        </defs>
+                        <text
+                          fontFamily={HOVER_ARC_CONFIG.fontFamily}
+                          fontSize={HOVER_ARC_CONFIG.arc1FontSize}
+                          fontWeight="500"
+                          fill="#1E1E1E"
+                          letterSpacing="0.2"
+                        >
+                          <textPath href="#tr-download-path" startOffset={HOVER_ARC_CONFIG.arc1StartOffset}>
+                            Click to Download ↑
+                          </textPath>
+                        </text>
+                        <text
+                          fontFamily={HOVER_ARC_CONFIG.fontFamily}
+                          fontSize={HOVER_ARC_CONFIG.arc2FontSize}
+                          fontWeight="600"
+                          fill="#1E1E1E"
+                          letterSpacing="0.3"
+                        >
+                          <textPath href="#tr-clicks-path" startOffset="50%" textAnchor="middle">
+                            {`${cardClicks} ${cardClicks === 1 ? 'click' : 'clicks'}`}
+                          </textPath>
+                        </text>
+                      </g>
+                    </motion.g>
                   </motion.g>
                 )}
               </AnimatePresence>

@@ -490,8 +490,8 @@ body {
 
 .scrubber-track-line {
   position: absolute;
-  height: 2.5px;
-  border-radius: 1.5px;
+  height: 1px;
+  border-radius: 0.5px;
   background-color: #BDBDBD;
   transform: translateX(-50%);
   left: 50%;

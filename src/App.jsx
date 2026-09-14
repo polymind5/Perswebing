@@ -94,6 +94,10 @@ const DissectingLine = memo(function DissectingLine({ index, total, scrubberY, y
       style={{
         top: `${yPos}px`,
         width: `${width}px`,
+        left: 0,
+        right: 0,
+        marginLeft: 'auto',
+        marginRight: 'auto',
         y: springY,
       }}
     />

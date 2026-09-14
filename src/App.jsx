@@ -344,14 +344,19 @@ export default function App() {
   }, [])
 
   const [isShuttering, setIsShuttering] = useState(false)
+  const [isCameraFlashing, setIsCameraFlashing] = useState(false)
   const [isDotHovered, setIsDotHovered] = useState(false)
   const [cardClicks, setCardClicks] = useState(0)
   const [stampConfig, setStampConfig] = useState(() => loadSavedStampConfig())
   const [showStampTuner, setShowStampTuner] = useState(true)
 
   const handleExportPrint = useCallback(() => {
-    if (isShuttering) return
+    if (isShuttering || isCameraFlashing) return
     setIsShuttering(true)
+    setIsCameraFlashing(true)
+    setTimeout(() => {
+      setIsCameraFlashing(false)
+    }, 250)
 
     const lineState = backgroundLineRef.current?.getCurrentState()
     if (!lineState) {
@@ -501,7 +506,7 @@ export default function App() {
     }
 
     img.src = url
-  }, [isShuttering, cardClicks, isMobile, stampConfig])
+  }, [isShuttering, isCameraFlashing, cardClicks, isMobile, stampConfig])
 
 
 
@@ -1280,9 +1285,12 @@ export default function App() {
           )}
         </AnimatePresence>
       </div>
-      <div
+      <motion.div
         className={`canvas-wrapper ${isMobile ? 'is-mobile' : ''}`}
+        animate={isCameraFlashing ? { scale: [1, 0.988, 1] } : { scale: 1 }}
+        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
         style={{
+          transformOrigin: 'center center',
           '--label-speed': `${layout.labels.speed}s`,
           '--label-top': `${layout.labels.topOffset}px`,
           '--label-start': `${layout.labels.startSlide}px`,
@@ -1761,7 +1769,7 @@ export default function App() {
               {/* Outer progress ring with camera-shutter contraction animation */}
               <motion.g
                 animate={isShuttering ? { scale: [1, 0.78, 1] } : { scale: 1 }}
-                transition={{ duration: 0.22, times: [0, 0.35, 1], ease: ['easeIn', 'easeOut'] }}
+                transition={{ duration: 0.25, times: [0, 0.35, 1], ease: ['easeIn', 'easeOut'] }}
                 style={{ transformOrigin: '50px 50px' }}
                 onAnimationComplete={() => setIsShuttering(false)}
               >
@@ -1805,7 +1813,7 @@ export default function App() {
         </div>
 
         {/* Card is rendered via portal below — outside the scaled .canvas */}
-      </div>
+      </motion.div>
       {/* ── Interactive floating 3D Card (Portal) ── */}
       {/* Rendered outside .canvas via portal so position:fixed works against viewport, not the scaled canvas */}
       {createPortal(
@@ -1879,6 +1887,25 @@ export default function App() {
             background: '#27AA20',
             zIndex: 1150,
             pointerEvents: 'none',
+          }}
+        />,
+        document.body
+      )}
+
+      {/* Camera Shutter Screenshot Flash Overlay (250ms) */}
+      {isCameraFlashing && createPortal(
+        <motion.div
+          key="screenshot-shutter-flash"
+          initial={{ opacity: 0.85 }}
+          animate={{ opacity: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: '#FFFFFF',
+            pointerEvents: 'none',
+            zIndex: 999999,
           }}
         />,
         document.body

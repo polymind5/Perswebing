@@ -44,7 +44,7 @@ export const STAMP_CONFIG = {
   dateLetterSpacing: 1.0,
   fontFamily: 'Michroma, sans-serif',
   fontWeight: '400',
-  textStroke: 0.8, // Fine black stroke outline on text
+  textStroke: 3.5, // Crisp, clearly defined black outline (visible at scale 0.35)
 
   // Colors
   blackColor: '#1E1E1E',
@@ -65,8 +65,8 @@ export function loadSavedStampConfig() {
         merged.textRadiusX = 255;
         merged.textRadiusY = 142;
       }
-      if (merged.textStroke === undefined) {
-        merged.textStroke = 0.8;
+      if (!merged.textStroke || merged.textStroke < 2) {
+        merged.textStroke = 3.5;
       }
       return merged;
     }
@@ -167,7 +167,7 @@ export default function CanvasStamp({
         fontWeight={cfg.fontWeight}
         fill={cfg.greenColor}
         stroke={cfg.blackColor}
-        strokeWidth={cfg.textStroke ?? 0.8}
+        strokeWidth={cfg.textStroke ?? 3.5}
         paintOrder="stroke fill"
         strokeLinejoin="round"
         letterSpacing={cfg.clicksLetterSpacing}
@@ -186,7 +186,7 @@ export default function CanvasStamp({
         fontWeight={cfg.fontWeight}
         fill={cfg.greenColor}
         stroke={cfg.blackColor}
-        strokeWidth={cfg.textStroke ?? 0.8}
+        strokeWidth={cfg.textStroke ?? 3.5}
         paintOrder="stroke fill"
         strokeLinejoin="round"
         letterSpacing={cfg.dateLetterSpacing}
@@ -208,8 +208,9 @@ export function getStampSvgString({ clicks = 0, timestamp, customConfig = {} } =
   const lowerArcD = `M ${-cfg.textRadiusX} 0 A ${cfg.textRadiusX} ${cfg.textRadiusY} 0 0 0 ${cfg.textRadiusX} 0`;
   const upperArcD = `M ${cfg.textRadiusX} 0 A ${cfg.textRadiusX} ${cfg.textRadiusY} 0 0 0 ${-cfg.textRadiusX} 0`;
   const safeFontFamily = (cfg.fontFamily || 'Michroma, sans-serif').replace(/["']/g, '').trim();
-  const textStrokeAttr = (cfg.textStroke ?? 0.8) > 0
-    ? `stroke="${cfg.blackColor}" stroke-width="${cfg.textStroke ?? 0.8}" paint-order="stroke fill" stroke-linejoin="round"`
+  const strokeW = cfg.textStroke ?? 3.5;
+  const textStrokeAttr = strokeW > 0
+    ? `stroke="${cfg.blackColor}" stroke-width="${strokeW}" paint-order="stroke fill" stroke-linejoin="round" style="paint-order: stroke fill;"`
     : '';
 
   return `

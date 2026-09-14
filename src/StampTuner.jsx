@@ -18,7 +18,7 @@ const PRESETS = {
       dateLetterSpacing: 1.0,
       fontFamily: 'Michroma, sans-serif',
       fontWeight: '400',
-      textStroke: 3.5,
+      textStroke: 2.2,
     },
   },
   tightReference: {
@@ -173,7 +173,7 @@ export default function StampTuner({
   const handleReset = () => {
     try {
       localStorage.removeItem(STORAGE_KEY);
-    } catch (e) {}
+    } catch (e) { }
     onReset();
   };
 
@@ -510,7 +510,7 @@ export default function StampTuner({
                 <ControlSlider
                   label="Black Stroke Width"
                   paramKey="textStroke"
-                  value={config.textStroke ?? 3.5}
+                  value={config.textStroke ?? 2.2}
                   min={0}
                   max={8}
                   step={0.2}

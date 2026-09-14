@@ -44,7 +44,7 @@ export const STAMP_CONFIG = {
   dateLetterSpacing: 1.0,
   fontFamily: 'Michroma, sans-serif',
   fontWeight: '400',
-  textStroke: 3.5, // Crisp, clearly defined black outline (visible at scale 0.35)
+  textStroke: 2.2, // Refined crisp black outline
 
   // Colors
   blackColor: '#1E1E1E',
@@ -65,8 +65,8 @@ export function loadSavedStampConfig() {
         merged.textRadiusX = 255;
         merged.textRadiusY = 142;
       }
-      if (!merged.textStroke || merged.textStroke < 2) {
-        merged.textStroke = 3.5;
+      if (!merged.textStroke || merged.textStroke < 1 || merged.textStroke === 3.5 || merged.textStroke === 0.8) {
+        merged.textStroke = 2.2;
       }
       return merged;
     }
@@ -167,7 +167,7 @@ export default function CanvasStamp({
         fontWeight={cfg.fontWeight}
         fill={cfg.greenColor}
         stroke={cfg.blackColor}
-        strokeWidth={cfg.textStroke ?? 3.5}
+        strokeWidth={cfg.textStroke ?? 2.2}
         paintOrder="stroke fill"
         strokeLinejoin="round"
         letterSpacing={cfg.clicksLetterSpacing}
@@ -186,7 +186,7 @@ export default function CanvasStamp({
         fontWeight={cfg.fontWeight}
         fill={cfg.greenColor}
         stroke={cfg.blackColor}
-        strokeWidth={cfg.textStroke ?? 3.5}
+        strokeWidth={cfg.textStroke ?? 2.2}
         paintOrder="stroke fill"
         strokeLinejoin="round"
         letterSpacing={cfg.dateLetterSpacing}
@@ -208,7 +208,7 @@ export function getStampSvgString({ clicks = 0, timestamp, customConfig = {} } =
   const lowerArcD = `M ${-cfg.textRadiusX} 0 A ${cfg.textRadiusX} ${cfg.textRadiusY} 0 0 0 ${cfg.textRadiusX} 0`;
   const upperArcD = `M ${cfg.textRadiusX} 0 A ${cfg.textRadiusX} ${cfg.textRadiusY} 0 0 0 ${-cfg.textRadiusX} 0`;
   const safeFontFamily = (cfg.fontFamily || 'Michroma, sans-serif').replace(/["']/g, '').trim();
-  const strokeW = cfg.textStroke ?? 3.5;
+  const strokeW = cfg.textStroke ?? 2.2;
   const textStrokeAttr = strokeW > 0
     ? `stroke="${cfg.blackColor}" stroke-width="${strokeW}" paint-order="stroke fill" stroke-linejoin="round" style="paint-order: stroke fill;"`
     : '';

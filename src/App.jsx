@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, memo } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useMotionTemplate } from 'motion/react'
 import ArchiveView from './ArchiveView'
@@ -68,6 +68,37 @@ const ARC2_PATH_D = getArcPath(
   HOVER_ARC_CONFIG.arc2EndAngle
 )
 
+// ── Scrubber Geometry & Individual Spring Dissecting Line ──
+const SCRUB_AREA_DISTANCE = 125
+const FIRST_LINE_DISTANCE = 24
+
+// Each dissecting line has its own independent spring for an organic accordion/guitar-string rebound
+const DissectingLine = memo(function DissectingLine({ index, total, scrubberY, yPos, width }) {
+  // Bottom lines feel the pull most intensely (Line 8 closest to the pulled dot)
+  const weight = Math.pow((index + 1) / total, 1.3)
+  const lineOverscroll = useTransform(scrubberY, (y) => {
+    if (y <= SCRUB_AREA_DISTANCE) return 0
+    return (y - SCRUB_AREA_DISTANCE) * 0.85 * weight
+  })
+
+  // Staggered individual spring parameters for distinct oscillation per line
+  const springY = useSpring(lineOverscroll, {
+    stiffness: 380 + index * 22,
+    damping: 15 + index * 1.3,
+    mass: 0.4 + index * 0.05,
+  })
+
+  return (
+    <motion.div
+      className="scrubber-track-line"
+      style={{
+        top: `${yPos}px`,
+        width: `${width}px`,
+        y: springY,
+      }}
+    />
+  )
+})
 
 /* ============================================
    Image data — each card's cycleable images
@@ -353,8 +384,6 @@ export default function App() {
   const [showStampTuner, setShowStampTuner] = useState(true)
 
   // ── Pull-down line scrubber state & motion values ──
-  const SCRUB_AREA_DISTANCE = 125
-  const FIRST_LINE_DISTANCE = 24
   const [isScrubbing, setIsScrubbing] = useState(false)
   const isDraggingScrubberRef = useRef(false)
   const hasDraggedFarRef = useRef(false)
@@ -380,19 +409,21 @@ export default function App() {
     { clamp: true }
   )
 
-  // Elastic spring activated if pulling past the 125px end point
-  const trackOverscrollY = useTransform(scrubberY, (y) => (y > SCRUB_AREA_DISTANCE ? (y - SCRUB_AREA_DISTANCE) * 0.75 : 0))
-  const trackSpringY = useSpring(trackOverscrollY, {
-    stiffness: 450,
-    damping: 18,
-    mass: 0.6,
-  })
+  // Clockwise rotation for "Click to Download ↑" along its arc as space opens for scrubber
+  const arc1Rotation = useTransform(
+    scrubberY,
+    [0, FIRST_LINE_DISTANCE],
+    [0, 18],
+    { clamp: true }
+  )
 
-  const trackScaleY = useTransform(scrubberY, (y) => (y > SCRUB_AREA_DISTANCE ? 1 + (y - SCRUB_AREA_DISTANCE) * 0.0025 : 1))
-  const trackSpringScaleY = useSpring(trackScaleY, {
-    stiffness: 450,
-    damping: 18,
-  })
+  // Anti-clockwise rotation for "{count} clicks" along its arc as space opens for scrubber
+  const arc2Rotation = useTransform(
+    scrubberY,
+    [0, FIRST_LINE_DISTANCE],
+    [0, -15],
+    { clamp: true }
+  )
 
   const handleScrubberDragStart = useCallback(() => {
     isDraggingScrubberRef.current = true
@@ -1784,9 +1815,6 @@ export default function App() {
             pointerEvents: 'none',
             zIndex: 1100,
             opacity: trackLinesOpacity,
-            y: trackSpringY,
-            scaleY: trackSpringScaleY,
-            transformOrigin: 'top center',
           } : {
             position: 'absolute',
             right: 30,
@@ -1795,9 +1823,6 @@ export default function App() {
             pointerEvents: 'none',
             zIndex: 1100,
             opacity: trackLinesOpacity,
-            y: trackSpringY,
-            scaleY: trackSpringScaleY,
-            transformOrigin: 'top center',
           }}
           aria-hidden="true"
         >
@@ -1809,13 +1834,13 @@ export default function App() {
             const endY = SCRUB_AREA_DISTANCE;
             const yPos = startY + i * ((endY - startY) / 8);
             return (
-              <div
+              <DissectingLine
                 key={i}
-                className="scrubber-track-line"
-                style={{
-                  top: `${yPos}px`,
-                  width: `${lineWidth}px`,
-                }}
+                index={i}
+                total={9}
+                scrubberY={scrubberY}
+                yPos={yPos}
+                width={lineWidth}
               />
             );
           })}
@@ -1896,28 +1921,47 @@ export default function App() {
                             fill="none"
                           />
                         </defs>
-                        <text
-                          fontFamily={HOVER_ARC_CONFIG.fontFamily}
-                          fontSize={HOVER_ARC_CONFIG.arc1FontSize}
-                          fontWeight="500"
-                          fill="#1E1E1E"
-                          letterSpacing="0.2"
+                        {/* Clockwise movement on Arc 1 opening space for scrubber */}
+                        <motion.g
+                          style={{
+                            rotate: arc1Rotation,
+                            transformBox: 'view-box',
+                            transformOrigin: `${HOVER_ARC_CONFIG.arc1CenterX}px ${HOVER_ARC_CONFIG.arc1CenterY}px`,
+                          }}
                         >
-                          <textPath href="#tr-download-path" startOffset={HOVER_ARC_CONFIG.arc1StartOffset}>
-                            Click to Download ↑
-                          </textPath>
-                        </text>
-                        <text
-                          fontFamily={HOVER_ARC_CONFIG.fontFamily}
-                          fontSize={HOVER_ARC_CONFIG.arc2FontSize}
-                          fontWeight="600"
-                          fill="#1E1E1E"
-                          letterSpacing="0.3"
+                          <text
+                            fontFamily={HOVER_ARC_CONFIG.fontFamily}
+                            fontSize={HOVER_ARC_CONFIG.arc1FontSize}
+                            fontWeight="500"
+                            fill="#1E1E1E"
+                            letterSpacing="0.2"
+                          >
+                            <textPath href="#tr-download-path" startOffset={HOVER_ARC_CONFIG.arc1StartOffset}>
+                              Click to Download ↑
+                            </textPath>
+                          </text>
+                        </motion.g>
+
+                        {/* Anti-clockwise movement on Arc 2 opening space for scrubber */}
+                        <motion.g
+                          style={{
+                            rotate: arc2Rotation,
+                            transformBox: 'view-box',
+                            transformOrigin: `${HOVER_ARC_CONFIG.arc2CenterX}px ${HOVER_ARC_CONFIG.arc2CenterY}px`,
+                          }}
                         >
-                          <textPath href="#tr-clicks-path" startOffset="50%" textAnchor="middle">
-                            {`${cardClicks} ${cardClicks === 1 ? 'click' : 'clicks'}`}
-                          </textPath>
-                        </text>
+                          <text
+                            fontFamily={HOVER_ARC_CONFIG.fontFamily}
+                            fontSize={HOVER_ARC_CONFIG.arc2FontSize}
+                            fontWeight="600"
+                            fill="#1E1E1E"
+                            letterSpacing="0.3"
+                          >
+                            <textPath href="#tr-clicks-path" startOffset="50%" textAnchor="middle">
+                              {`${cardClicks} ${cardClicks === 1 ? 'click' : 'clicks'}`}
+                            </textPath>
+                          </text>
+                        </motion.g>
                       </g>
                     </motion.g>
                   </motion.g>

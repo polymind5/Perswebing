@@ -13,17 +13,17 @@
 
 export const DEFAULT_SHUTTER_CONFIG = {
   enabled: true,
-  volume: 0.45,            // Master volume (0.0 = silent, 1.0 = maximum)
+  volume: 0.70,            // Master volume (0.0 = silent, 1.0 = maximum)
   audioUrl: '',            // Optional: path to an audio file (e.g. '/shutter.mp3'). If set, plays this file.
 
   // ── Procedural Synthesizer Parameters ──
-  pitch: 1350,             // Starting frequency of mechanical click transient (Hz)
-  pitchDecay: 0.02,        // Duration of click transient (seconds)
-  noiseFreq: 4200,         // Center frequency of shutter aperture noise (Hz)
+  pitch: 1800,             // Starting frequency of mechanical click transient (Hz)
+  pitchDecay: 0.03,        // Duration of click transient (seconds)
+  noiseFreq: 4100,         // Center frequency of shutter aperture noise (Hz)
   noiseDuration: 0.035,    // Duration of shutter noise burst (seconds)
   doubleAction: true,      // Dual mechanical action ("ka-chick" dual-curtain release)
-  doubleActionDelay: 0.048,// Delay between first and second curtain click (seconds)
-  curtainVolume: 0.65,     // Volume ratio of the secondary curtain click
+  doubleActionDelay: 0.032,// Delay between first and second curtain click (seconds)
+  curtainVolume: 0.70,     // Volume ratio of the secondary curtain click
 };
 
 // Global active config that can be modified or overridden
@@ -44,7 +44,7 @@ function getAudioContext() {
     cachedAudioCtx = new AudioCtx();
   }
   if (cachedAudioCtx.state === 'suspended') {
-    cachedAudioCtx.resume().catch(() => {});
+    cachedAudioCtx.resume().catch(() => { });
   }
   return cachedAudioCtx;
 }

@@ -8,6 +8,7 @@ import BackgroundLine from './BackgroundLine'
 import CanvasStamp, { STAMP_CONFIG, getStampSvgString, loadSavedStampConfig } from './CanvasStamp'
 import StampTuner from './StampTuner'
 import { playShutterSound } from './shutterSound'
+import { playCardCycleSound } from './cardAudio'
 
 // Master switches: easily enable or disable canvas features
 const ENABLE_BACKGROUND_LINE = true
@@ -911,24 +912,28 @@ export default function App() {
 
   /* ── Click‑to‑cycle ── */
   const handleProjectClick = () => {
+    playCardCycleSound()
     setProjectIdx((i) => (i + 1) % PROJECTS_IMAGES.length)
     setTappedCards((prev) => ({ ...prev, projects: true }))
     setCardClicks((c) => c + 1)
     backgroundLineRef.current?.triggerBurst()
   }
   const handleAnimationClick = () => {
+    playCardCycleSound()
     setAnimationIdx((i) => (i + 1) % ANIMATIONS_VIDEOS.length)
     setTappedCards((prev) => ({ ...prev, animations: true }))
     setCardClicks((c) => c + 1)
     backgroundLineRef.current?.triggerBurst()
   }
   const handleGraphicClick = () => {
+    playCardCycleSound()
     setGraphicIdx((i) => (i + 1) % GRAPHICS_IMAGES.length)
     setTappedCards((prev) => ({ ...prev, graphics: true }))
     setCardClicks((c) => c + 1)
     backgroundLineRef.current?.triggerBurst()
   }
   const handlePhotoClick = () => {
+    playCardCycleSound()
     setPhotoIdx((i) => (i + 1) % PHOTOS_IMAGES.length)
     setTappedCards((prev) => ({ ...prev, photos: true }))
     setCardClicks((c) => c + 1)

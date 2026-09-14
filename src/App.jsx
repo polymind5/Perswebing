@@ -441,7 +441,11 @@ export default function App() {
         transform="rotate(-90 ${tr.x} ${tr.y})"
       />
       <!-- Dynamic Vector Stamp -->
-      ${ENABLE_STAMP_ON_EXPORT ? getStampSvgString({ clicks: cardClicks, customConfig: stampConfig }) : ''}
+      ${ENABLE_STAMP_ON_EXPORT ? (
+        isMobile
+          ? `<g transform="translate(${canvasW}, 0) rotate(90)">${getStampSvgString({ clicks: cardClicks, customConfig: stampConfig })}</g>`
+          : getStampSvgString({ clicks: cardClicks, customConfig: stampConfig })
+      ) : ''}
     </svg>`
 
     const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })

@@ -74,13 +74,13 @@ export function loadSavedStampConfig() {
 
 export function formatStampDate(date = new Date()) {
   const d = date instanceof Date ? date : new Date(date);
-  const month = d.getMonth() + 1;
   const day = d.getDate();
+  const month = d.getMonth() + 1;
   const year = d.getFullYear();
   const hours = d.getHours();
   const minutes = String(d.getMinutes()).padStart(2, '0');
   const seconds = String(d.getSeconds()).padStart(2, '0');
-  return `${month}/${day}/${year} ${hours}:${minutes}:${seconds}`;
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 }
 
 export default function CanvasStamp({

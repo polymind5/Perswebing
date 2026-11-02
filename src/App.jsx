@@ -110,6 +110,7 @@ const DissectingLine = memo(function DissectingLine({ index, total, scrubberY, y
    ============================================ */
 const PROJECTS_IMAGES = [
   { src: '/images/Projects/Patterns_72.webp', title: 'RangRekh', desc: 'RangRekh is an exploration of patterns emerging from constrainted space of means, where only one origin exists but how countless variations arise from within.', dark: false, link: 'https://rangrekh.framer.website' },
+  { src: '/images/Projects/Marginalia logo.png', title: 'Marginalia', desc: 'A publication bringing forth the nuances of the unedited thoughts.', dark: false },
   { src: '/images/Projects/Tria.webp', title: 'Tria', desc: 'Tria is a revolving gallery of arts. Showcasing all the things made and said by women.', dark: false, link: 'https://tria.framer.website' },
 ]
 

@@ -15,7 +15,7 @@ import { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
 const BACKGROUND_LINE_CONFIG = {
   // Dot green: rgb(39, 170, 32) matching #27AA20
   color: '39, 170, 32',
-  alpha: 0.38,             // Increased opacity (crisp & clearly visible green)
+  alpha: 0.34,             // Reduced opacity by 10% (crisp & subtle green)
   strokeWidth: 4.17,       // Matches 4.17px in Affinity Designer export (~2.67px on canvas)
   mobileStrokeWidth: 5.2,  // Slightly bolder stroke for phone displays
   baseSpeed: 3.8,          // Ambient growth speed (units / frame) - tuned to standard 3.8
